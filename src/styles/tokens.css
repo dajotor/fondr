@@ -1,0 +1,23 @@
+:root {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 5.5%;
+  --card-foreground: 0 0% 100%;
+  --primary: 183 100% 50%;
+  --primary-foreground: 195 100% 4%;
+  --secondary: 0 0% 7%;
+  --secondary-foreground: 0 0% 96%;
+  --muted: 0 0% 6%;
+  --muted-foreground: 0 0% 42%;
+  --accent: 189 100% 80%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 56%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 14%;
+  --input: 0 0% 14%;
+  --ring: 183 100% 50%;
+  --radius: 0.625rem;
+  --font-sans: var(--font-inter), Inter, Arial, Helvetica, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-inter), Inter, Arial, Helvetica, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, SFMono-Regular, monospace;
+}
