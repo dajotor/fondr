@@ -1,6 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PublicFooter } from "@/components/public/public-footer";
+
+export const metadata: Metadata = {
+  title: "ETF Sparplan Rechner | FONDR",
+  description:
+    "ETF Sparplan Rechner für klare Finanzplanung: FONDR zeigt dir, ob dein Sparplan wirklich zu deinem Ziel führt.",
+  openGraph: {
+    title: "ETF Sparplan Rechner | FONDR",
+    description:
+      "FONDR zeigt dir, ob dein Sparplan wirklich zu deinem Ziel führt — mit echten Szenarien statt Durchschnittswerten.",
+  },
+};
 
 export default function HomePage() {
   return (
@@ -12,26 +24,37 @@ export default function HomePage() {
             <div className="pointer-events-none absolute right-0 top-10 h-40 w-40 rounded-full bg-orange-500/20 blur-3xl" />
             <div className="max-w-3xl space-y-7">
               <span className="app-eyebrow">
-                Finanzplanung für ETF-Portfolios
+                ETF Sparplan Rechner
               </span>
               <div className="space-y-3">
                 <h1 className="max-w-3xl text-5xl font-semibold tracking-[-0.05em] text-foreground md:text-6xl">
-                  Verstehe dein Geld. Plane deine nächsten Schritte mit Ruhe.
+                  Endlich weißt du, ob es reicht.
                 </h1>
-                <p className="max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
-                  FONDR hilft dir, Portfolio, Einzahlungen und Ziele an einem Ort
-                  zu ordnen. Klar erklärt, fachlich sauber und ohne unnötigen
-                  Finanzjargon.
-                </p>
+                <div className="max-w-2xl space-y-4 text-base leading-8 text-slate-300 md:text-lg">
+                  <p>
+                    FONDR zeigt dir, ob dein Sparplan wirklich zu deinem Ziel führt
+                    — mit echten Szenarien statt Durchschnittswerten.
+                  </p>
+                  <p>
+                    Kein Broker. Kein Berater. Kein Abo.
+                    <br />
+                    Nur dein Plan, klar durchgerechnet.
+                  </p>
+                </div>
               </div>
               <div className="app-accent-line max-w-xl" />
-              <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  href="/login"
-                  className="app-button-primary"
-                >
-                  Anmelden
-                </Link>
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    href="/login"
+                    className="app-button-primary"
+                  >
+                    Meinen Plan starten
+                  </Link>
+                </div>
+                <p className="text-sm text-slate-400">
+                  ✓ Dauerhaft kostenlos   ✓ Keine Kreditkarte   ✓ Kein Abo
+                </p>
               </div>
             </div>
           </section>
