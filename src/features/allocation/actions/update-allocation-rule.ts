@@ -55,8 +55,10 @@ export async function updateAllocationRule(
 
   const parsedValues = allocationRuleSchema.safeParse({
     etfId: formData.get("etfId"),
+    isActive: formData.get("isActive"),
     sequenceOrder: formData.get("sequenceOrder"),
     contributionCap: formData.get("contributionCap"),
+    targetPercentage: formData.get("targetPercentage"),
   });
 
   if (!parsedValues.success) {
@@ -85,11 +87,16 @@ export async function updateAllocationRule(
     .from("allocation_rules")
     .update({
       etf_id: parsedValues.data.etfId,
+      is_active: parsedValues.data.isActive,
       sequence_order: parsedValues.data.sequenceOrder,
       contribution_cap:
         parsedValues.data.contributionCap === undefined
           ? null
           : parsedValues.data.contributionCap.toFixed(2),
+      target_percentage:
+        parsedValues.data.targetPercentage === undefined
+          ? null
+          : parsedValues.data.targetPercentage.toFixed(2),
     })
     .eq("id", ruleId)
     .eq("user_id", user.id);

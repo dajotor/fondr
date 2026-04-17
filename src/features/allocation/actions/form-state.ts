@@ -1,7 +1,9 @@
 export type AllocationRuleFieldValues = {
   etfId: string;
+  isActive: string;
   sequenceOrder: string;
   contributionCap: string;
+  targetPercentage: string;
 };
 
 export type ManualAllocationOverrideFieldValues = {
@@ -29,8 +31,10 @@ export const initialAllocationRuleFormState: AllocationRuleFormState = {
   fieldErrors: {},
   fieldValues: {
     etfId: "",
+    isActive: "true",
     sequenceOrder: "",
     contributionCap: "",
+    targetPercentage: "",
   },
 };
 
@@ -50,8 +54,10 @@ export function toAllocationRuleFieldValues(
 ): AllocationRuleFieldValues {
   return {
     etfId: String(formData.get("etfId") ?? ""),
+    isActive: String(formData.get("isActive") ?? "true"),
     sequenceOrder: String(formData.get("sequenceOrder") ?? ""),
     contributionCap: String(formData.get("contributionCap") ?? ""),
+    targetPercentage: String(formData.get("targetPercentage") ?? ""),
   };
 }
 

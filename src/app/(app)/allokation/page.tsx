@@ -12,6 +12,9 @@ import { getLumpSumContributions } from "@/features/contributions/queries/get-lu
 import { requireUser } from "@/lib/auth/guard";
 import { NoticeList } from "@/components/ui/notice-list";
 import { buildAllocationNotices } from "@/lib/plausibility";
+import { formatPercentage } from "@/lib/formatting/number";
+
+const PERCENTAGE_CONFIGURATION_EPSILON = 0.01;
 
 export default async function AllocationPage() {
   const user = await requireUser();
@@ -47,6 +50,18 @@ export default async function AllocationPage() {
     contributionRules,
     lumpSums,
   });
+  const activeRules = allocationRules.filter((rule) => rule.isActive);
+  const configuredActiveRules = activeRules.filter(
+    (rule) => rule.targetPercentage !== null,
+  );
+  const activePercentageTotal = configuredActiveRules.reduce(
+    (sum, rule) => sum + (rule.targetPercentage ?? 0),
+    0,
+  );
+  const usesPercentageStandardModel =
+    activeRules.length > 0 &&
+    configuredActiveRules.length === activeRules.length &&
+    Math.abs(activePercentageTotal - 100) <= PERCENTAGE_CONFIGURATION_EPSILON;
 
   return (
     <section className="space-y-8">
@@ -62,9 +77,9 @@ export default async function AllocationPage() {
               Lege fest, wie neue Einzahlungen verteilt werden.
             </h2>
             <p className="max-w-3xl text-[15px] leading-8 text-slate-300">
-              Hier bestimmst du, in welcher Reihenfolge neue Beiträge auf deine
-              ETFs gehen. So bleibt deine Verteilung nachvollziehbar und
-              planbar.
+              Hier legst du fest, welche ETFs aktiv bespart werden, mit welchem
+              Anteil und ob einzelne Positionen optional begrenzt sein sollen.
+              So bleibt dein Sparplan klar, nachvollziehbar und ruhig steuerbar.
             </p>
           </div>
           <div className="app-accent-line max-w-2xl" />
@@ -87,18 +102,57 @@ export default async function AllocationPage() {
       ) : (
         <>
           <div className="rounded-[calc(var(--radius)+2px)] border border-border bg-background/80 p-6 md:p-8">
-          <div className="mb-6 space-y-2">
+            <div className="mb-6 space-y-2">
               <h3 className="text-xl font-semibold tracking-tight text-foreground">
-                Reihenfolge und Grenzen
+                Aktive Verteilung
               </h3>
               <p className="text-sm leading-6 text-muted-foreground">
-              Neue Einzahlungen fließen zuerst in den ETF mit der nächsten
-              aktiven Reihenfolge. Ist eine Grenze erreicht, wird der restliche
-              Betrag im selben Monat automatisch weiterverteilt. Die Grenze
-              bezieht sich auf die bisher eingezahlte Summe inklusive Einstand,
-              nicht auf den aktuellen Marktwert.
-            </p>
-          </div>
+                Wähle je ETF, ob er aktiv bespart wird und mit welchem Anteil.
+                Ein optionales Cap begrenzt neue Einzahlungen ab einer definierten
+                kumulierten Einzahlungssumme. Reihenfolge bleibt intern als
+                Fallback erhalten, ist aber nicht mehr der primäre Bedienpfad.
+              </p>
+            </div>
+
+            <div className="mb-6 grid gap-4 rounded-[calc(var(--radius)+2px)] border border-border/80 bg-card/40 p-4 md:grid-cols-3">
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                  Aktiv bespart
+                </p>
+                <p className="text-2xl font-semibold tracking-tight text-foreground">
+                  {activeRules.length}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  von {portfolioEtfs.length} ETFs im Portfolio
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                  Summe der Zielquoten
+                </p>
+                <p className="text-2xl font-semibold tracking-tight text-foreground">
+                  {formatPercentage(activePercentageTotal)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Nur aktive ETFs mit hinterlegtem Anteil werden mitgezählt.
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                  Aktueller Modus
+                </p>
+                <p className="text-sm font-medium text-foreground">
+                  {usesPercentageStandardModel
+                    ? "Prozent-Allokation aktiv"
+                    : "Legacy-Fallback aktiv"}
+                </p>
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {usesPercentageStandardModel
+                    ? "Die automatische Verteilung kann mit deinen aktiven Zielquoten rechnen."
+                    : "Solange aktive Zielquoten fehlen oder nicht 100 % ergeben, nutzt FONDR intern weiter die bestehende Reihenfolge-Logik."}
+                </p>
+              </div>
+            </div>
 
             <div className="grid gap-4 xl:grid-cols-2">
               {portfolioEtfs.map((etf, index) => (
@@ -124,7 +178,7 @@ export default async function AllocationPage() {
                 <p className="text-sm leading-6 text-muted-foreground">
                   Für einzelne Monate kannst du feste Prozentanteile vorgeben.
                   Bleibt danach noch etwas übrig, verteilt FONDR den Rest nach
-                  deinen bestehenden Regeln weiter.
+                  deiner aktiven Standard-Allokation weiter.
                 </p>
               </div>
               <ManualAllocationOverrideForm etfs={portfolioEtfs} />
@@ -153,7 +207,8 @@ export default async function AllocationPage() {
           </h3>
           <p className="text-sm leading-6 text-muted-foreground">
             Die Vorschau zeigt dir pro Monat, wie dein Beitrag auf ETFs verteilt
-            würde und ob ein Rest übrig bleibt, weil keine passende Regel greift.
+            würde, welche Monats-Ausnahmen eingreifen und ob ein Rest übrig
+            bleibt, weil keine passende Regel greift.
           </p>
         </div>
         <AllocationTimelinePreview timeline={allocationTimeline} />

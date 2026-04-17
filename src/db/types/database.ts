@@ -15,7 +15,9 @@ export type Database = {
           created_at: string;
           etf_id: string;
           id: string;
+          is_active: boolean;
           sequence_order: number;
+          target_percentage: string | null;
           updated_at: string;
           user_id: string;
         };
@@ -24,7 +26,9 @@ export type Database = {
           created_at?: string;
           etf_id: string;
           id?: string;
+          is_active?: boolean;
           sequence_order: number;
+          target_percentage?: string | null;
           updated_at?: string;
           user_id: string;
         };
@@ -33,7 +37,9 @@ export type Database = {
           created_at?: string;
           etf_id?: string;
           id?: string;
+          is_active?: boolean;
           sequence_order?: number;
+          target_percentage?: string | null;
           updated_at?: string;
           user_id?: string;
         };

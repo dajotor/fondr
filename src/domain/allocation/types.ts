@@ -4,8 +4,10 @@ export type AllocationRule = {
   id: UUID;
   userId: UUID;
   etfId: UUID;
+  isActive: boolean;
   sequenceOrder: number;
   contributionCap: number | null;
+  targetPercentage: number | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
