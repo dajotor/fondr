@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { AppNav } from "@/components/app-nav";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { PublicFooter } from "@/components/public/public-footer";
 import { getOrCreatePrimaryPortfolio } from "@/features/portfolio/queries/get-or-create-primary-portfolio";
 import { requireUser } from "@/lib/auth/guard";
 
@@ -16,7 +17,7 @@ export default async function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="app-shell">
       <div className="app-surface">
-        <div className="app-panel min-h-[calc(100vh-2rem)] overflow-hidden">
+        <div className="app-panel flex min-h-[calc(100vh-2rem)] flex-col overflow-hidden">
           <header className="relative flex flex-col gap-5 border-b app-divider px-5 py-5 md:px-8 md:py-6 xl:flex-row xl:items-start xl:justify-between">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/70 to-transparent" />
             <div className="space-y-4 xl:max-w-[70%]">
@@ -39,7 +40,10 @@ export default async function AppLayout({ children }: AppLayoutProps) {
             </div>
           </header>
 
-          <main className="px-5 py-8 md:px-8 md:py-10">{children}</main>
+          <main className="flex-1 px-5 py-8 md:px-8 md:py-10">{children}</main>
+          <div className="px-5 pb-6 md:px-8 md:pb-8">
+            <PublicFooter />
+          </div>
         </div>
       </div>
     </div>

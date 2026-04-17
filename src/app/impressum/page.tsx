@@ -15,8 +15,7 @@ export default function ImpressumPage() {
                   Impressum
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-slate-300">
-                  Angaben und rechtliche Hinweise zu FONDR in ruhiger,
-                  übersichtlicher Form.
+                  Angaben und rechtliche Hinweise zu FONDR.
                 </p>
               </div>
             </div>
