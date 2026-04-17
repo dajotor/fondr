@@ -1,6 +1,7 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 
+import { PublicFooter } from "@/components/public/public-footer";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type ConfirmPageProps = {
@@ -75,41 +76,44 @@ export default async function AuthConfirmPage({ searchParams }: ConfirmPageProps
 
   return (
     <main className="app-shell">
-      <div className="app-surface flex min-h-screen items-center justify-center">
-        <section className="app-panel relative w-full max-w-md overflow-hidden p-8 md:p-10">
-          <div className="pointer-events-none absolute -right-8 top-0 h-32 w-32 rounded-full bg-fuchsia-500/18 blur-3xl" />
-          <div className="pointer-events-none absolute -left-8 bottom-0 h-28 w-28 rounded-full bg-orange-500/14 blur-3xl" />
-          <div className="space-y-8">
-            <div className="space-y-3">
-              <span className="app-eyebrow">
-                Login
-              </span>
-              <div className="space-y-2">
-                <h1 className="text-4xl font-semibold tracking-[-0.04em] text-foreground">
-                  Anmeldung abschließen
-                </h1>
-                <p className="text-sm leading-7 text-slate-300">
-                  Bestätige den Login einmal direkt in FONDR. So vermeiden wir,
-                  dass E-Mail-Scanner deinen Einmal-Link vor dir verbrauchen.
-                </p>
+      <div className="app-surface flex min-h-screen flex-col">
+        <div className="flex flex-1 items-center justify-center">
+          <section className="app-panel relative w-full max-w-md overflow-hidden p-8 md:p-10">
+            <div className="pointer-events-none absolute -right-8 top-0 h-32 w-32 rounded-full bg-fuchsia-500/18 blur-3xl" />
+            <div className="pointer-events-none absolute -left-8 bottom-0 h-28 w-28 rounded-full bg-orange-500/14 blur-3xl" />
+            <div className="space-y-8">
+              <div className="space-y-3">
+                <span className="app-eyebrow">
+                  Login
+                </span>
+                <div className="space-y-2">
+                  <h1 className="text-4xl font-semibold tracking-[-0.04em] text-foreground">
+                    Anmeldung abschließen
+                  </h1>
+                  <p className="text-sm leading-7 text-slate-300">
+                    Bestätige den Login einmal direkt in FONDR. So vermeiden wir,
+                    dass E-Mail-Scanner deinen Einmal-Link vor dir verbrauchen.
+                  </p>
+                </div>
               </div>
+
+              <form action={completeMagicLinkSignIn} className="space-y-4">
+                <input type="hidden" name="code" value={code} />
+                <input type="hidden" name="token_hash" value={tokenHash} />
+                <input type="hidden" name="type" value={type} />
+                <input type="hidden" name="next" value={next} />
+
+                <button
+                  type="submit"
+                  className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-primary px-5 text-sm font-medium text-primary-foreground transition hover:opacity-95"
+                >
+                  Login jetzt abschließen
+                </button>
+              </form>
             </div>
-
-            <form action={completeMagicLinkSignIn} className="space-y-4">
-              <input type="hidden" name="code" value={code} />
-              <input type="hidden" name="token_hash" value={tokenHash} />
-              <input type="hidden" name="type" value={type} />
-              <input type="hidden" name="next" value={next} />
-
-              <button
-                type="submit"
-                className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-primary px-5 text-sm font-medium text-primary-foreground transition hover:opacity-95"
-              >
-                Login jetzt abschließen
-              </button>
-            </form>
-          </div>
-        </section>
+          </section>
+        </div>
+        <PublicFooter />
       </div>
     </main>
   );
