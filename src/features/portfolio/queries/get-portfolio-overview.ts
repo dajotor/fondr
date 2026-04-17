@@ -9,6 +9,8 @@ type HoldingRow = Tables<"portfolio_holdings"> & {
   etf: Tables<"etfs"> | null;
 };
 
+const EPSILON = 0.000001;
+
 async function selectHoldingRows(portfolioId: string) {
   const supabase = await createSupabaseServerClient();
 
@@ -73,6 +75,23 @@ function parseNumericValue(value: string | null | undefined): number | null {
   return Number.isFinite(numericValue) ? numericValue : null;
 }
 
+function calculateGainLossPercentage(
+  unitPrice: number | null,
+  costBasisPerShare: number | null,
+) {
+  if (
+    unitPrice === null ||
+    costBasisPerShare === null ||
+    Math.abs(costBasisPerShare) < EPSILON
+  ) {
+    return null;
+  }
+
+  const gainLossPercentage = ((unitPrice / costBasisPerShare) - 1) * 100;
+
+  return Number.isFinite(gainLossPercentage) ? gainLossPercentage : null;
+}
+
 function mapHoldingRow(row: HoldingRow): PortfolioHoldingView {
   const quantity = Number(row.quantity);
   const costBasisPerShare = parseNumericValue(row.cost_basis_per_share);
@@ -86,10 +105,10 @@ function mapHoldingRow(row: HoldingRow): PortfolioHoldingView {
     unitPrice === null || costBasisPerShare === null
       ? null
       : (unitPrice - costBasisPerShare) * quantity;
-  const gainLossPercentage =
-    unitPrice === null || costBasisPerShare === null
-      ? null
-      : ((unitPrice / costBasisPerShare) - 1) * 100;
+  const gainLossPercentage = calculateGainLossPercentage(
+    unitPrice,
+    costBasisPerShare,
+  );
 
   return {
     id: row.id,
