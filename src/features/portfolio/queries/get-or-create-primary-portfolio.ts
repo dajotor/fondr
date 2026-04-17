@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import type { Portfolio } from "@/domain/portfolio/types";
 import type { Tables } from "@/db/types/database";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -34,7 +36,45 @@ function formatSupabaseError(
   return parts.join(" | ");
 }
 
-export async function getOrCreatePrimaryPortfolio(
+async function loadPrimaryPortfolios(userId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("portfolios")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("is_primary", true)
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true })
+    .limit(2);
+
+  return { data, error };
+}
+
+async function wait(ms: number) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function reloadPrimaryPortfolioWithRetry(userId: string) {
+  for (const delayMs of [0, 25, 75]) {
+    if (delayMs > 0) {
+      await wait(delayMs);
+    }
+
+    const { data, error } = await loadPrimaryPortfolios(userId);
+
+    if (error) {
+      return { data: null, error };
+    }
+
+    if (data?.[0]) {
+      return { data, error: null };
+    }
+  }
+
+  return { data: null, error: null };
+}
+
+export const getOrCreatePrimaryPortfolio = cache(async function getOrCreatePrimaryPortfolio(
   userId: string,
 ): Promise<Portfolio> {
   const supabase = await createSupabaseServerClient();
@@ -64,14 +104,8 @@ export async function getOrCreatePrimaryPortfolio(
     );
   }
 
-  const { data: existingPortfolios, error: existingError } = await supabase
-    .from("portfolios")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("is_primary", true)
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true })
-    .limit(2);
+  const { data: existingPortfolios, error: existingError } =
+    await loadPrimaryPortfolios(userId);
 
   if (existingError) {
     throw new Error(
@@ -104,14 +138,8 @@ export async function getOrCreatePrimaryPortfolio(
     return mapPortfolio(insertedPortfolio);
   }
 
-  const { data: fallbackPortfolios, error: fallbackError } = await supabase
-    .from("portfolios")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("is_primary", true)
-    .order("created_at", { ascending: true })
-    .order("id", { ascending: true })
-    .limit(2);
+  const { data: fallbackPortfolios, error: fallbackError } =
+    await reloadPrimaryPortfolioWithRetry(userId);
 
   if (fallbackError) {
     throw new Error(
@@ -141,4 +169,4 @@ export async function getOrCreatePrimaryPortfolio(
   throw new Error(
     "Failed to create primary portfolio | Insert returned no row and no existing primary portfolio was found.",
   );
-}
+});
