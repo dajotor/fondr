@@ -36,7 +36,10 @@ export async function signInWithMagicLink(
   }
 
   const supabase = await createSupabaseServerClient();
-  const redirectTo = `${await getAppUrl()}/auth/confirm?next=/dashboard`;
+  const redirectTo = new URL(
+    "/auth/confirm?next=/dashboard",
+    await getAppUrl(),
+  ).toString();
   const { error } = await supabase.auth.signInWithOtp({
     email: email.trim(),
     options: {
@@ -55,6 +58,6 @@ export async function signInWithMagicLink(
   return {
     error: null,
     success:
-      "Der Magic Link wurde gesendet. Bitte pruefe dein E-Mail-Postfach.",
+      "Der Magic Link wurde gesendet. Bitte prüfe dein E-Mail-Postfach.",
   };
 }

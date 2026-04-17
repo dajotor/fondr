@@ -6,6 +6,7 @@ import { getSessionUser } from "@/features/auth/queries/get-session-user";
 type LoginPageProps = {
   searchParams: Promise<{
     error?: string;
+    error_code?: string;
   }>;
 };
 
@@ -18,7 +19,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   const params = await searchParams;
   const errorMessage =
-    params.error === "auth_callback"
+    params.error === "otp_expired" || params.error_code === "otp_expired"
+      ? "Dieser Login-Link ist nicht mehr gültig. Bitte fordere einen neuen Magic Link an."
+      : params.error === "auth_callback"
       ? "Die Anmeldung konnte nicht abgeschlossen werden. Bitte versuche es erneut."
       : null;
 
