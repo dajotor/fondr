@@ -37,6 +37,7 @@ export function AllocationRuleCard({
   const [isActive, setIsActive] = useState(savedIsActive);
   const [targetPercentage, setTargetPercentage] = useState(savedTargetPercentage);
   const [contributionCap, setContributionCap] = useState(savedContributionCap);
+  const [isCapSectionOpen, setIsCapSectionOpen] = useState(false);
 
   useEffect(() => {
     setIsActive(
@@ -62,6 +63,12 @@ export function AllocationRuleCard({
     );
   }, [hasSubmittedValues, savedContributionCap, state.fieldValues.contributionCap]);
 
+  useEffect(() => {
+    if (state.fieldErrors.contributionCap) {
+      setIsCapSectionOpen(true);
+    }
+  }, [state.fieldErrors.contributionCap]);
+
   const normalizeOptionalNumber = (value: string) => {
     const trimmedValue = value.trim();
 
@@ -80,15 +87,24 @@ export function AllocationRuleCard({
       normalizeOptionalNumber(savedTargetPercentage) ||
     normalizeOptionalNumber(contributionCap) !==
       normalizeOptionalNumber(savedContributionCap);
+  const parsedContributionCap = Number(contributionCap);
+  const hasContributionCap =
+    contributionCap.trim() !== "" && Number.isFinite(parsedContributionCap) && parsedContributionCap > 0;
+  const capReached =
+    isActive &&
+    hasContributionCap &&
+    etf.portfolioCostBasis !== null &&
+    etf.portfolioCostBasis >= parsedContributionCap;
+  const cardClasses = capReached
+    ? "border-amber-300/30 bg-amber-500/[0.04] shadow-[0_0_0_1px_rgba(252,211,77,0.06)]"
+    : isActive
+      ? "border-cyan-300/30 shadow-[0_0_0_1px_rgba(103,232,249,0.08)]"
+      : "border-slate-800/80 bg-slate-950/20";
 
   return (
     <form
       action={formAction}
-      className={`rounded-[calc(var(--radius)+2px)] border bg-background/80 p-4 transition ${
-        isActive
-          ? "border-cyan-300/30 shadow-[0_0_0_1px_rgba(103,232,249,0.08)]"
-          : "border-border/80"
-      }`}
+      className={`rounded-[calc(var(--radius)+2px)] border p-4 transition ${cardClasses}`}
     >
       <input type="hidden" name="etfId" value={etf.etfId} />
       {rule ? <input type="hidden" name="ruleId" value={rule.id} /> : null}
@@ -159,61 +175,78 @@ export function AllocationRuleCard({
             )}
           </div>
 
-          <div className="space-y-2">
-            <div className="space-y-1">
-              <label
-                htmlFor={`cap-${etf.etfId}`}
-                className="text-sm font-medium text-foreground/90"
-              >
-                Optionales Cap
-              </label>
-              <p className="text-xs leading-5 text-muted-foreground">
-                Erweiterte Regel: Stoppt neue Einzahlungen ab einer kumulierten Einzahlungssumme.
-              </p>
-            </div>
-            <input
-              id={`cap-${etf.etfId}`}
-              name="contributionCap"
-              type="number"
-              min="0"
-              step="0.01"
-              value={contributionCap}
-              onChange={(event) => setContributionCap(event.target.value)}
-              placeholder={!rule && suggestedContributionCap ? suggestedContributionCap : "leer = unbegrenzt"}
-              className="h-11 w-full rounded-2xl border border-input bg-background px-4 text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-            />
-            {etf.portfolioCostBasis !== null ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setContributionCap(suggestedContributionCap)}
-                  className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-card px-3 text-xs font-medium text-foreground transition hover:bg-secondary"
-                >
-                  Portfolio-Kostenbasis uebernehmen
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setContributionCap("")}
-                  className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-card px-3 text-xs font-medium text-foreground transition hover:bg-secondary"
-                >
-                  Unbegrenzt lassen
-                </button>
+          <details
+            open={isCapSectionOpen}
+            onToggle={(event) =>
+              setIsCapSectionOpen((event.currentTarget as HTMLDetailsElement).open)
+            }
+            className="rounded-2xl border border-border/80 bg-card/30 px-4 py-3"
+          >
+            <summary className="cursor-pointer list-none">
+              <div className="flex items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground/90">
+                    Optionales Cap
+                  </p>
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    Begrenzt neue Einzahlungen ab einer kumulierten Einzahlungssumme.
+                  </p>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {capReached
+                    ? "derzeit erreicht"
+                    : hasContributionCap
+                      ? "gesetzt"
+                      : "aus"}
+                </span>
               </div>
-            ) : null}
-            {state.fieldErrors.contributionCap ? (
-              <p className="text-xs text-destructive">
-                {state.fieldErrors.contributionCap}
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                {etf.portfolioCostBasis !== null
-                  ? `${rule?.contributionCap ? `Aktuell ${formatCurrency(rule.contributionCap)}. ` : ""}Portfolio-Referenz aus Kostenbasis (Einstandskurs x Stueckzahl): ${formatCurrency(etf.portfolioCostBasis)}. Wenn du diesen Wert als Cap speicherst, gilt der ETF ab dann als voll und bekommt keine neuen Einzahlungen mehr.`
-                  : rule?.contributionCap
-                    ? `Aktuell ${formatCurrency(rule.contributionCap)}. Das Cap bezieht sich auf kumulierte Einzahlungen, nicht auf den Marktwert.`
-                    : "Leer lassen fuer unbegrenzten ETF. Das Cap bezieht sich auf kumulierte Einzahlungen, nicht auf den Marktwert."}
-              </p>
-            )}
-          </div>
+            </summary>
+
+            <div className="mt-4 space-y-2">
+              <input
+                id={`cap-${etf.etfId}`}
+                name="contributionCap"
+                type="number"
+                min="0"
+                step="0.01"
+                value={contributionCap}
+                onChange={(event) => setContributionCap(event.target.value)}
+                placeholder={!rule && suggestedContributionCap ? suggestedContributionCap : "leer = unbegrenzt"}
+                className="h-11 w-full rounded-2xl border border-input bg-background px-4 text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
+              />
+              {etf.portfolioCostBasis !== null ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setContributionCap(suggestedContributionCap)}
+                    className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-card px-3 text-xs font-medium text-foreground transition hover:bg-secondary"
+                  >
+                    Portfolio-Kostenbasis uebernehmen
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setContributionCap("")}
+                    className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-card px-3 text-xs font-medium text-foreground transition hover:bg-secondary"
+                  >
+                    Unbegrenzt lassen
+                  </button>
+                </div>
+              ) : null}
+              {state.fieldErrors.contributionCap ? (
+                <p className="text-xs text-destructive">
+                  {state.fieldErrors.contributionCap}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  {etf.portfolioCostBasis !== null
+                    ? `${rule?.contributionCap ? `Aktuell ${formatCurrency(rule.contributionCap)}. ` : ""}Portfolio-Referenz aus Kostenbasis (Einstandskurs x Stueckzahl): ${formatCurrency(etf.portfolioCostBasis)}. Wenn du diesen Wert als Cap speicherst, gilt der ETF ab dann als voll und bekommt keine neuen Einzahlungen mehr.`
+                    : rule?.contributionCap
+                      ? `Aktuell ${formatCurrency(rule.contributionCap)}. Das Cap bezieht sich auf kumulierte Einzahlungen, nicht auf den Marktwert.`
+                      : "Leer lassen fuer unbegrenzten ETF. Das Cap bezieht sich auf kumulierte Einzahlungen, nicht auf den Marktwert."}
+                </p>
+              )}
+            </div>
+          </details>
         </div>
 
         {state.error ? (
