@@ -16,13 +16,11 @@ import { formatPercentage } from "@/lib/formatting/number";
 type AllocationRuleCardProps = {
   etf: AllocationEtfOption;
   rule: AllocationRuleView | null;
-  defaultSequenceOrder: number;
 };
 
 export function AllocationRuleCard({
   etf,
   rule,
-  defaultSequenceOrder,
 }: AllocationRuleCardProps) {
   const action = rule ? updateAllocationRule : createAllocationRule;
   const [state, formAction, isPending] = useActionState(
@@ -225,45 +223,6 @@ export function AllocationRuleCard({
           </div>
         </div>
 
-        <details className="rounded-2xl border border-border/80 bg-card/40 px-4 py-3">
-          <summary className="cursor-pointer list-none text-sm font-medium text-foreground">
-            Erweiterte Regeln
-          </summary>
-          <div className="mt-4 space-y-3">
-            <div className="space-y-2">
-              <label
-                htmlFor={`sequence-${etf.etfId}`}
-                className="text-sm font-medium text-foreground/90"
-              >
-                Reihenfolge (Legacy / Fallback)
-              </label>
-              <input
-                id={`sequence-${etf.etfId}`}
-                name="sequenceOrder"
-                type="number"
-                min="1"
-                step="1"
-                defaultValue={
-                  state.fieldValues.sequenceOrder ||
-                  rule?.sequenceOrder?.toString() ||
-                  defaultSequenceOrder.toString()
-                }
-                className="h-11 w-full rounded-2xl border border-input bg-background px-4 text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-                required
-              />
-              {state.fieldErrors.sequenceOrder ? (
-                <p className="text-xs text-destructive">
-                  {state.fieldErrors.sequenceOrder}
-                </p>
-              ) : (
-                <p className="text-xs text-muted-foreground">
-                  Wird weiterhin intern als Fallback genutzt, falls keine vollständige Prozent-Allokation vorliegt.
-                </p>
-              )}
-            </div>
-          </div>
-        </details>
-
         {state.error ? (
           <p className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
             {state.error}
@@ -271,7 +230,7 @@ export function AllocationRuleCard({
         ) : null}
 
         <p className="text-xs text-muted-foreground">
-          Status, Hervorhebung und Zusammenfassung beziehen sich auf die gespeicherte Regel. Aenderungen im Formular werden erst nach dem Speichern uebernommen.
+          Status, Hervorhebung und Zusammenfassung beziehen sich auf die gespeicherte Regel. Aenderungen im Formular werden erst nach dem Speichern uebernommen. Die interne Reihenfolge fuer den Legacy-Fallback verwaltet FONDR automatisch.
         </p>
 
         <button

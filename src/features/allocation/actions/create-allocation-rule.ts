@@ -13,6 +13,23 @@ import { getPortfolioAllocationEtfs } from "@/features/allocation/queries/get-po
 import { allocationRuleSchema } from "@/features/allocation/validators/allocation-rule.schema";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+async function resolveNextSequenceOrder(userId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("allocation_rules")
+    .select("sequence_order")
+    .eq("user_id", userId)
+    .order("sequence_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("Failed to resolve allocation sequence.");
+  }
+
+  return (data?.sequence_order ?? 0) + 1;
+}
+
 function mapFieldErrors(
   issues: { path: (string | number)[]; message: string }[],
 ): AllocationRuleFormState["fieldErrors"] {
@@ -72,12 +89,14 @@ export async function createAllocationRule(
     };
   }
 
+  const sequenceOrder =
+    parsedValues.data.sequenceOrder ?? (await resolveNextSequenceOrder(user.id));
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.from("allocation_rules").insert({
     user_id: user.id,
     etf_id: parsedValues.data.etfId,
     is_active: parsedValues.data.isActive,
-    sequence_order: parsedValues.data.sequenceOrder,
+    sequence_order: sequenceOrder,
     contribution_cap:
       parsedValues.data.contributionCap === undefined
         ? null
@@ -92,9 +111,8 @@ export async function createAllocationRule(
     if (error.code === "23505") {
       return {
         error:
-          "ETF oder Reihenfolge sind bereits belegt. Bitte pruefe deine Angaben.",
+          "Fuer diesen ETF existiert bereits eine Regel oder die automatische Reihenfolge konnte nicht eindeutig vergeben werden. Bitte versuche es erneut.",
         fieldErrors: {
-          sequenceOrder: "Diese Reihenfolge ist bereits vergeben.",
           etfId: "Fuer diesen ETF existiert bereits eine Regel.",
         },
         fieldValues: toAllocationRuleFieldValues(formData),

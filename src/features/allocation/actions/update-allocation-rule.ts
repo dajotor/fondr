@@ -13,6 +13,22 @@ import { getPortfolioAllocationEtfs } from "@/features/allocation/queries/get-po
 import { allocationRuleSchema } from "@/features/allocation/validators/allocation-rule.schema";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+async function resolveSequenceOrderForUpdate(userId: string, ruleId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("allocation_rules")
+    .select("sequence_order")
+    .eq("user_id", userId)
+    .eq("id", ruleId)
+    .maybeSingle();
+
+  if (error || !data) {
+    throw new Error("Failed to resolve allocation sequence.");
+  }
+
+  return data.sequence_order;
+}
+
 function mapFieldErrors(
   issues: { path: (string | number)[]; message: string }[],
 ): AllocationRuleFormState["fieldErrors"] {
@@ -82,13 +98,16 @@ export async function updateAllocationRule(
     };
   }
 
+  const sequenceOrder =
+    parsedValues.data.sequenceOrder ??
+    (await resolveSequenceOrderForUpdate(user.id, ruleId));
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase
     .from("allocation_rules")
     .update({
       etf_id: parsedValues.data.etfId,
       is_active: parsedValues.data.isActive,
-      sequence_order: parsedValues.data.sequenceOrder,
+      sequence_order: sequenceOrder,
       contribution_cap:
         parsedValues.data.contributionCap === undefined
           ? null
@@ -105,10 +124,8 @@ export async function updateAllocationRule(
     if (error.code === "23505") {
       return {
         error:
-          "ETF oder Reihenfolge sind bereits belegt. Bitte pruefe deine Angaben.",
-        fieldErrors: {
-          sequenceOrder: "Diese Reihenfolge ist bereits vergeben.",
-        },
+          "Die Allokationsregel kollidiert mit einer bestehenden Regel. Bitte pruefe den ETF und versuche es erneut.",
+        fieldErrors: {},
         fieldValues: toAllocationRuleFieldValues(formData),
       };
     }

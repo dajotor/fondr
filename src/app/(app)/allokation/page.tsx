@@ -155,7 +155,7 @@ export default async function AllocationPage() {
             </div>
 
             <div className="grid gap-4 xl:grid-cols-2">
-              {portfolioEtfs.map((etf, index) => (
+              {portfolioEtfs.map((etf) => (
                 <AllocationRuleCard
                   key={etf.etfId}
                   etf={etf}
@@ -163,7 +163,6 @@ export default async function AllocationPage() {
                     allocationRules.find((rule) => rule.etfId === etf.etfId) ??
                     null
                   }
-                  defaultSequenceOrder={index + 1}
                 />
               ))}
             </div>
