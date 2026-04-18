@@ -84,7 +84,7 @@ export function AllocationRuleCard({
     >
       <input type="hidden" name="etfId" value={etf.etfId} />
       {rule ? <input type="hidden" name="ruleId" value={rule.id} /> : null}
-      <input type="hidden" name="isActive" value="false" />
+      <input type="hidden" name="isActive" value={isActive ? "true" : "false"} />
 
       <div className="space-y-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -108,9 +108,7 @@ export function AllocationRuleCard({
 
           <label className="inline-flex items-center gap-3 rounded-full border border-border bg-card px-3 py-2 text-xs font-medium text-foreground">
             <input
-              name="isActive"
               type="checkbox"
-              value="true"
               checked={isActive}
               onChange={(event) => setIsActive(event.target.checked)}
               className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-ring/20"
