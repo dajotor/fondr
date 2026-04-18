@@ -81,6 +81,8 @@ export function AllocationRuleCard({
     return Number.isFinite(numericValue) ? numericValue.toString() : trimmedValue;
   };
 
+  const roundCurrencyToCent = (value: number) => Math.round(value * 100) / 100;
+
   const hasUnsavedChanges =
     isActive !== savedIsActive ||
     normalizeOptionalNumber(targetPercentage) !==
@@ -91,11 +93,16 @@ export function AllocationRuleCard({
   const parsedContributionCap = Number(contributionCap);
   const hasContributionCap =
     contributionCap.trim() !== "" && Number.isFinite(parsedContributionCap) && parsedContributionCap > 0;
+  const roundedContributionCap = roundCurrencyToCent(parsedContributionCap);
+  const roundedPortfolioCostBasis =
+    etf.portfolioCostBasis === null
+      ? null
+      : roundCurrencyToCent(etf.portfolioCostBasis);
   const capReached =
     isActive &&
     hasContributionCap &&
-    etf.portfolioCostBasis !== null &&
-    etf.portfolioCostBasis >= parsedContributionCap;
+    roundedPortfolioCostBasis !== null &&
+    roundedPortfolioCostBasis >= roundedContributionCap;
   const cardClasses = capReached
     ? "border-slate-500/70 bg-slate-900/35 shadow-[0_0_0_1px_rgba(148,163,184,0.08)]"
     : isActive
