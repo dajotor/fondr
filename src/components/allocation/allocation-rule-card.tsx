@@ -10,7 +10,6 @@ import {
   initialAllocationRuleFormState,
 } from "@/features/allocation/actions/form-state";
 import { updateAllocationRule } from "@/features/allocation/actions/update-allocation-rule";
-import { formatCurrencyWhole } from "@/lib/formatting/currency";
 import { formatPercentage } from "@/lib/formatting/number";
 
 type AllocationRuleCardProps = {
@@ -27,17 +26,12 @@ export function AllocationRuleCard({
     action,
     initialAllocationRuleFormState,
   );
-  const suggestedContributionCap =
-    etf.portfolioCostBasis === null ? "" : etf.portfolioCostBasis.toFixed(2);
   const hasSavedRule = rule !== null;
   const savedIsActive = rule?.isActive ?? false;
   const hasSubmittedValues = state.fieldValues.etfId === etf.etfId;
   const savedTargetPercentage = rule?.targetPercentage?.toString() ?? "";
-  const savedContributionCap = rule?.contributionCap?.toString() ?? "";
   const [isActive, setIsActive] = useState(savedIsActive);
   const [targetPercentage, setTargetPercentage] = useState(savedTargetPercentage);
-  const [contributionCap, setContributionCap] = useState(savedContributionCap);
-  const [isCapSectionOpen, setIsCapSectionOpen] = useState(false);
 
   useEffect(() => {
     setIsActive(
@@ -55,20 +49,6 @@ export function AllocationRuleCard({
     );
   }, [hasSubmittedValues, savedTargetPercentage, state.fieldValues.targetPercentage]);
 
-  useEffect(() => {
-    setContributionCap(
-      hasSubmittedValues
-        ? state.fieldValues.contributionCap
-        : savedContributionCap,
-    );
-  }, [hasSubmittedValues, savedContributionCap, state.fieldValues.contributionCap]);
-
-  useEffect(() => {
-    if (state.fieldErrors.contributionCap) {
-      setIsCapSectionOpen(true);
-    }
-  }, [state.fieldErrors.contributionCap]);
-
   const normalizeOptionalNumber = (value: string) => {
     const trimmedValue = value.trim();
 
@@ -85,36 +65,15 @@ export function AllocationRuleCard({
     return Number.isFinite(numericValue) ? numericValue.toString() : trimmedValue;
   };
 
-  const roundCurrencyToCent = (value: number) => Math.round(value * 100) / 100;
-
   const hasUnsavedChanges =
     isActive !== savedIsActive ||
     normalizeOptionalNumber(targetPercentage) !==
-      normalizeOptionalNumber(savedTargetPercentage) ||
-    normalizeOptionalNumber(contributionCap) !==
-      normalizeOptionalNumber(savedContributionCap);
+      normalizeOptionalNumber(savedTargetPercentage);
   const hasVisibleFieldErrors = Object.keys(state.fieldErrors).length > 0;
-  const parsedContributionCap = Number(contributionCap);
-  const hasContributionCap =
-    contributionCap.trim() !== "" && Number.isFinite(parsedContributionCap) && parsedContributionCap > 0;
-  const roundedContributionCap = roundCurrencyToCent(parsedContributionCap);
-  const roundedPortfolioCostBasis =
-    etf.portfolioCostBasis === null
-      ? null
-      : roundCurrencyToCent(etf.portfolioCostBasis);
   const normalizedTargetPercentage = normalizeOptionalNumber(targetPercentage);
-  const displayedContributionCap =
-    hasContributionCap ? formatCurrencyWhole(parsedContributionCap) : null;
-  const capReached =
-    isActive &&
-    hasContributionCap &&
-    roundedPortfolioCostBasis !== null &&
-    roundedPortfolioCostBasis >= roundedContributionCap;
-  const cardClasses = capReached
-    ? "border-slate-500/70 bg-slate-900/35 shadow-[0_0_0_1px_rgba(148,163,184,0.08)]"
-    : isActive
-      ? "border-cyan-300/30 shadow-[0_0_0_1px_rgba(103,232,249,0.08)]"
-      : "border-slate-800/80 bg-slate-950/20";
+  const cardClasses = isActive
+    ? "border-cyan-300/30 shadow-[0_0_0_1px_rgba(103,232,249,0.08)]"
+    : "border-slate-800/80 bg-slate-950/20";
 
   return (
     <form
@@ -143,125 +102,50 @@ export function AllocationRuleCard({
           </label>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-          <div className="space-y-2">
-            <div className="space-y-1">
-              <label
-                htmlFor={`target-${etf.etfId}`}
-                className="text-sm font-medium text-foreground/90"
-              >
-                Anteil im Sparplan
-              </label>
-              <p className="text-xs leading-5 text-muted-foreground">
-                Lege fest, welcher Anteil neuer Einzahlungen standardmäßig in diesen ETF fließt.
-              </p>
-            </div>
-            <input
-              id={`target-${etf.etfId}`}
-              name="targetPercentage"
-              type="number"
-              min="0"
-              step="0.01"
-              value={targetPercentage}
-              onChange={(event) => setTargetPercentage(event.target.value)}
-              placeholder={isActive ? "z. B. 50" : "leer = nicht aktiv"}
-              className="h-11 w-full rounded-2xl border border-input bg-background px-4 text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-            />
-            {state.fieldErrors.targetPercentage ? (
-              <p className="text-xs text-destructive">
-                {state.fieldErrors.targetPercentage}
-              </p>
-            ) : normalizedTargetPercentage !== "" ? (
-              <p className="text-xs text-muted-foreground">
-                Aktuell geplant mit {formatPercentage(Number(targetPercentage))}.
-              </p>
-            ) : isActive ? (
-              <p className="text-xs text-muted-foreground">
-                Ohne Anteil bleibt dieser ETF im neuen Standardmodell unvollständig konfiguriert.
-              </p>
-            ) : hasSavedRule ? (
-              <p className="text-xs text-muted-foreground">
-                Dieser ETF ist gespeichert pausiert und wird aktuell nicht automatisch bespart.
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                Lege bei Bedarf einen Anteil fest und speichere die Regel, um diesen ETF in den Sparplan aufzunehmen.
-              </p>
-            )}
+        <div className="space-y-2">
+          <div className="space-y-1">
+            <label
+              htmlFor={`target-${etf.etfId}`}
+              className="text-sm font-medium text-foreground/90"
+            >
+              Anteil im Sparplan
+            </label>
+            <p className="text-xs leading-5 text-muted-foreground">
+              Lege fest, welcher Anteil neuer Einzahlungen standardmäßig in diesen ETF fließt.
+            </p>
           </div>
-
-          <details
-            open={isCapSectionOpen}
-            onToggle={(event) =>
-              setIsCapSectionOpen((event.currentTarget as HTMLDetailsElement).open)
-            }
-            className="rounded-2xl border border-border/80 bg-card/30 px-4 py-3"
-          >
-            <summary className="cursor-pointer list-none">
-              <div className="flex items-center justify-between gap-3">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-foreground/90">
-                    Optionales Cap
-                  </p>
-                  <p className="text-xs leading-5 text-muted-foreground">
-                    Begrenzt neue Einzahlungen ab einer kumulierten Einzahlungssumme.
-                  </p>
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {capReached
-                    ? "derzeit pausiert"
-                    : hasContributionCap
-                      ? "gesetzt"
-                      : "aus"}
-                </span>
-              </div>
-            </summary>
-
-            <div className="mt-4 space-y-2">
-              <input
-                id={`cap-${etf.etfId}`}
-                name="contributionCap"
-                type="number"
-                min="0"
-                step="0.01"
-                value={contributionCap}
-                onChange={(event) => setContributionCap(event.target.value)}
-                placeholder={!rule && suggestedContributionCap ? suggestedContributionCap : "leer = unbegrenzt"}
-                className="h-11 w-full rounded-2xl border border-input bg-background px-4 text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-              />
-              {etf.portfolioCostBasis !== null ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setContributionCap(suggestedContributionCap)}
-                    className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-card px-3 text-xs font-medium text-foreground transition hover:bg-secondary"
-                  >
-                    Portfolio-Kostenbasis übernehmen
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setContributionCap("")}
-                    className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-card px-3 text-xs font-medium text-foreground transition hover:bg-secondary"
-                  >
-                    Unbegrenzt lassen
-                  </button>
-                </div>
-              ) : null}
-              {state.fieldErrors.contributionCap ? (
-                <p className="text-xs text-destructive">
-                  {state.fieldErrors.contributionCap}
-                </p>
-              ) : (
-                <p className="text-xs text-muted-foreground">
-                  {etf.portfolioCostBasis !== null
-                    ? `${displayedContributionCap ? `Aktuell ${displayedContributionCap}. ` : ""}Portfolio-Referenz aus Kostenbasis (Einstandskurs x Stückzahl): ${formatCurrencyWhole(etf.portfolioCostBasis)}. Wenn du diesen Wert als Cap speicherst, pausieren neue Einzahlungen ab dann automatisch.`
-                    : displayedContributionCap
-                      ? `Aktuell ${displayedContributionCap}. Das Cap bezieht sich auf kumulierte Einzahlungen, nicht auf den Marktwert.`
-                      : "Leer lassen für unbegrenzten ETF. Das Cap bezieht sich auf kumulierte Einzahlungen, nicht auf den Marktwert."}
-                </p>
-              )}
-            </div>
-          </details>
+          <input
+            id={`target-${etf.etfId}`}
+            name="targetPercentage"
+            type="number"
+            min="0"
+            step="0.01"
+            value={targetPercentage}
+            onChange={(event) => setTargetPercentage(event.target.value)}
+            placeholder={isActive ? "z. B. 50" : "leer = nicht aktiv"}
+            className="h-11 w-full rounded-2xl border border-input bg-background px-4 text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
+          />
+          {state.fieldErrors.targetPercentage ? (
+            <p className="text-xs text-destructive">
+              {state.fieldErrors.targetPercentage}
+            </p>
+          ) : normalizedTargetPercentage !== "" ? (
+            <p className="text-xs text-muted-foreground">
+              Aktuell geplant mit {formatPercentage(Number(targetPercentage))}.
+            </p>
+          ) : isActive ? (
+            <p className="text-xs text-muted-foreground">
+              Ohne Anteil bleibt dieser ETF in der Prozent-Allokation noch unvollständig.
+            </p>
+          ) : hasSavedRule ? (
+            <p className="text-xs text-muted-foreground">
+              Dieser ETF ist gespeichert pausiert und wird aktuell nicht automatisch bespart.
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Lege bei Bedarf einen Anteil fest und speichere die Regel, um diesen ETF in den Sparplan aufzunehmen.
+            </p>
+          )}
         </div>
 
         {state.error && !hasVisibleFieldErrors ? (

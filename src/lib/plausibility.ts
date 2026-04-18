@@ -133,7 +133,7 @@ export function buildAllocationNotices(params: {
     notices.push({
       id: "allocation-no-rules",
       title: "Noch keine Allokationsregeln aktiv",
-      body: "Ohne Reihenfolge oder Caps koennen neue Beitraege nicht automatisch auf ETFs verteilt werden.",
+      body: "Ohne aktive ETFs und Zielquoten können neue Beiträge noch nicht automatisch verteilt werden.",
       tone: "warning",
     });
   }
@@ -146,7 +146,7 @@ export function buildAllocationNotices(params: {
     notices.push({
       id: "allocation-unallocated",
       title: "Ein Teil der Beitraege bleibt uninvestiert",
-      body: "In der Vorschau gibt es Monate ohne aktiven ETF. Typische Ursachen sind fehlende Regeln oder ausgeschoepfte Caps.",
+      body: "In der Vorschau gibt es Monate mit unverplantem Rest. Typische Ursachen sind fehlende aktive Zielquoten oder eine Summe unter 100 %.",
       tone: "warning",
     });
   }

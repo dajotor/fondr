@@ -52,7 +52,7 @@ export default async function AllocationPage() {
   });
   const activeRules = allocationRules.filter((rule) => rule.isActive);
   const configuredActiveRules = activeRules.filter(
-    (rule) => rule.targetPercentage !== null,
+    (rule) => (rule.targetPercentage ?? 0) > PERCENTAGE_CONFIGURATION_EPSILON,
   );
   const activePercentageTotal = configuredActiveRules.reduce(
     (sum, rule) => sum + (rule.targetPercentage ?? 0),
@@ -84,8 +84,8 @@ export default async function AllocationPage() {
             </h2>
             <p className="max-w-3xl text-[15px] leading-8 text-slate-300">
               Hier legst du fest, welche ETFs aktiv bespart werden, mit welchem
-              Anteil und ob einzelne Positionen optional begrenzt sein sollen.
-              So bleibt dein Sparplan klar, nachvollziehbar und ruhig steuerbar.
+              Anteil. So bleibt dein Sparplan klar, nachvollziehbar und ruhig
+              steuerbar.
             </p>
           </div>
           <div className="app-accent-line max-w-2xl" />
@@ -114,7 +114,6 @@ export default async function AllocationPage() {
               </h3>
               <p className="text-sm leading-6 text-muted-foreground">
                 Wähle je ETF, ob er aktiv bespart wird und mit welchem Anteil.
-                Ein optionales Cap kann neue Einzahlungen begrenzen.
               </p>
             </div>
 
@@ -139,10 +138,10 @@ export default async function AllocationPage() {
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {activePercentageOverconfigured
-                    ? "So ist die Verteilung noch nicht gueltig. Bitte reduziere die aktiven Zielquoten zusammen auf hoechstens 100 %."
+                    ? "So ist die Verteilung noch nicht gültig. Bitte reduziere die aktiven Zielquoten zusammen auf höchstens 100 %."
                     : activePercentageIncomplete
-                      ? "Der verbleibende Anteil bleibt vorerst unverplant und wird als Reserve weitergefuehrt."
-                      : "Nur aktive ETFs mit hinterlegtem Anteil werden mitgezaehlt."}
+                      ? "Der verbleibende Anteil bleibt vorerst unverplant und wird als Reserve weitergeführt."
+                      : "Nur aktive ETFs mit hinterlegtem Anteil werden mitgezählt."}
                 </p>
               </div>
               <div className="space-y-1">
@@ -154,13 +153,13 @@ export default async function AllocationPage() {
                     ? "Prozent-Allokation aktiv"
                     : activePercentageOverconfigured
                       ? "Zielquoten bitte anpassen"
-                      : "Prozent-Allokation noch nicht vollstaendig"}
+                      : "Prozent-Allokation noch nicht vollständig"}
                 </p>
                 <p className="text-xs leading-5 text-muted-foreground">
                   {usesPercentageStandardModel
                     ? "Die automatische Verteilung kann mit deinen aktiven Zielquoten rechnen."
                     : activePercentageOverconfigured
-                      ? "Die aktiven Zielquoten duerfen zusammen nicht ueber 100 % liegen."
+                      ? "Die aktiven Zielquoten dürfen zusammen nicht über 100 % liegen."
                       : "Sobald alle aktiven ETFs einen Anteil haben und zusammen 100 % ergeben, verteilt FONDR neue Einzahlungen automatisch danach."}
                 </p>
               </div>
