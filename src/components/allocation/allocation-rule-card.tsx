@@ -31,59 +31,61 @@ export function AllocationRuleCard({
     etf.portfolioCostBasis === null ? "" : etf.portfolioCostBasis.toFixed(2);
   const hasSavedRule = rule !== null;
   const savedIsActive = rule?.isActive ?? false;
-  const cardIsHighlighted = hasSavedRule && savedIsActive;
-  const [isActive, setIsActive] = useState(
-    state.fieldValues.isActive
-      ? state.fieldValues.isActive === "true"
-      : savedIsActive,
-  );
-  const [targetPercentage, setTargetPercentage] = useState(
-    state.fieldValues.targetPercentage || (rule?.targetPercentage?.toString() ?? ""),
-  );
-  const [contributionCap, setContributionCap] = useState(
-    state.fieldValues.contributionCap ||
-      (rule?.contributionCap?.toString() ??
-        (!rule ? suggestedContributionCap : "")),
-  );
+  const hasSubmittedValues = state.fieldValues.etfId === etf.etfId;
+  const savedTargetPercentage = rule?.targetPercentage?.toString() ?? "";
+  const savedContributionCap = rule?.contributionCap?.toString() ?? "";
+  const [isActive, setIsActive] = useState(savedIsActive);
+  const [targetPercentage, setTargetPercentage] = useState(savedTargetPercentage);
+  const [contributionCap, setContributionCap] = useState(savedContributionCap);
 
   useEffect(() => {
     setIsActive(
-      state.fieldValues.isActive
+      hasSubmittedValues
         ? state.fieldValues.isActive === "true"
         : savedIsActive,
     );
-  }, [savedIsActive, state.fieldValues.isActive]);
+  }, [hasSubmittedValues, savedIsActive, state.fieldValues.isActive]);
 
   useEffect(() => {
     setTargetPercentage(
-      state.fieldValues.targetPercentage || (rule?.targetPercentage?.toString() ?? ""),
+      hasSubmittedValues
+        ? state.fieldValues.targetPercentage
+        : savedTargetPercentage,
     );
-  }, [rule?.targetPercentage, state.fieldValues.targetPercentage]);
+  }, [hasSubmittedValues, savedTargetPercentage, state.fieldValues.targetPercentage]);
 
   useEffect(() => {
     setContributionCap(
-      state.fieldValues.contributionCap ||
-        (rule?.contributionCap?.toString() ??
-          (!rule ? suggestedContributionCap : "")),
+      hasSubmittedValues
+        ? state.fieldValues.contributionCap
+        : savedContributionCap,
     );
-  }, [rule?.contributionCap, state.fieldValues.contributionCap, suggestedContributionCap]);
+  }, [hasSubmittedValues, savedContributionCap, state.fieldValues.contributionCap]);
 
-  const showsPendingActivation = !savedIsActive && isActive;
-  const statusBadgeLabel = hasSavedRule
-    ? savedIsActive
-      ? "Aktiv bespart"
-      : showsPendingActivation
-        ? "Wird nach Speichern aktiv"
-        : "Derzeit pausiert"
-    : showsPendingActivation
-      ? "Wird nach Speichern angelegt"
-      : "Noch keine Regel";
+  const normalizeOptionalNumber = (value: string) => {
+    const trimmedValue = value.trim();
+
+    if (trimmedValue === "") {
+      return "";
+    }
+
+    const numericValue = Number(trimmedValue);
+
+    return Number.isFinite(numericValue) ? numericValue.toString() : trimmedValue;
+  };
+
+  const hasUnsavedChanges =
+    isActive !== savedIsActive ||
+    normalizeOptionalNumber(targetPercentage) !==
+      normalizeOptionalNumber(savedTargetPercentage) ||
+    normalizeOptionalNumber(contributionCap) !==
+      normalizeOptionalNumber(savedContributionCap);
 
   return (
     <form
       action={formAction}
       className={`rounded-[calc(var(--radius)+2px)] border bg-background/80 p-4 transition ${
-        cardIsHighlighted
+        isActive
           ? "border-cyan-300/30 shadow-[0_0_0_1px_rgba(103,232,249,0.08)]"
           : "border-border/80"
       }`}
@@ -95,20 +97,7 @@ export function AllocationRuleCard({
       <div className="space-y-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="text-sm font-medium text-foreground">{etf.etfName}</p>
-              <span
-                className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium ${
-                  cardIsHighlighted
-                    ? "border-cyan-300/25 bg-cyan-300/10 text-cyan-100"
-                    : hasSavedRule
-                      ? "border-border bg-card text-muted-foreground"
-                      : "border-border/80 bg-card/70 text-muted-foreground"
-                }`}
-              >
-                {statusBadgeLabel}
-              </span>
-            </div>
+            <p className="text-sm font-medium text-foreground">{etf.etfName}</p>
             <p className="text-xs text-muted-foreground">{etf.isin}</p>
           </div>
 
@@ -233,9 +222,11 @@ export function AllocationRuleCard({
           </p>
         ) : null}
 
-        <p className="text-xs text-muted-foreground">
-          Aenderungen in dieser Karte werden erst nach dem Speichern uebernommen.
-        </p>
+        {hasUnsavedChanges ? (
+          <p className="text-xs text-muted-foreground">
+            Aenderungen noch nicht gespeichert.
+          </p>
+        ) : null}
 
         <button
           type="submit"
