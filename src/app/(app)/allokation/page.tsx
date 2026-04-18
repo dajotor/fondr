@@ -108,9 +108,7 @@ export default async function AllocationPage() {
               </h3>
               <p className="text-sm leading-6 text-muted-foreground">
                 Wähle je ETF, ob er aktiv bespart wird und mit welchem Anteil.
-                Ein optionales Cap begrenzt neue Einzahlungen ab einer definierten
-                kumulierten Einzahlungssumme. Reihenfolge bleibt intern als
-                Fallback erhalten, ist aber nicht mehr der primäre Bedienpfad.
+                Ein optionales Cap kann neue Einzahlungen begrenzen.
               </p>
             </div>
 
@@ -144,12 +142,12 @@ export default async function AllocationPage() {
                 <p className="text-sm font-medium text-foreground">
                   {usesPercentageStandardModel
                     ? "Prozent-Allokation aktiv"
-                    : "Legacy-Fallback aktiv"}
+                    : "Prozent-Allokation noch nicht vollstaendig"}
                 </p>
                 <p className="text-xs leading-5 text-muted-foreground">
                   {usesPercentageStandardModel
                     ? "Die automatische Verteilung kann mit deinen aktiven Zielquoten rechnen."
-                    : "Solange aktive Zielquoten fehlen oder nicht 100 % ergeben, nutzt FONDR intern weiter die bestehende Reihenfolge-Logik."}
+                    : "Sobald alle aktiven ETFs einen Anteil haben und zusammen 100 % ergeben, verteilt FONDR neue Einzahlungen automatisch danach."}
                 </p>
               </div>
             </div>

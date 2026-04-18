@@ -32,11 +32,6 @@ export function AllocationRuleCard({
   const hasSavedRule = rule !== null;
   const savedIsActive = rule?.isActive ?? false;
   const cardIsHighlighted = hasSavedRule && savedIsActive;
-  const statusBadgeLabel = hasSavedRule
-    ? savedIsActive
-      ? "Aktiv bespart"
-      : "Derzeit pausiert"
-    : "Noch keine Regel";
   const [isActive, setIsActive] = useState(
     state.fieldValues.isActive
       ? state.fieldValues.isActive === "true"
@@ -72,6 +67,17 @@ export function AllocationRuleCard({
           (!rule ? suggestedContributionCap : "")),
     );
   }, [rule?.contributionCap, state.fieldValues.contributionCap, suggestedContributionCap]);
+
+  const showsPendingActivation = !savedIsActive && isActive;
+  const statusBadgeLabel = hasSavedRule
+    ? savedIsActive
+      ? "Aktiv bespart"
+      : showsPendingActivation
+        ? "Wird nach Speichern aktiv"
+        : "Derzeit pausiert"
+    : showsPendingActivation
+      ? "Wird nach Speichern angelegt"
+      : "Noch keine Regel";
 
   return (
     <form
@@ -228,7 +234,7 @@ export function AllocationRuleCard({
         ) : null}
 
         <p className="text-xs text-muted-foreground">
-          Status, Hervorhebung und Zusammenfassung beziehen sich auf die gespeicherte Regel. Aenderungen im Formular werden erst nach dem Speichern uebernommen. Die interne Reihenfolge fuer den Legacy-Fallback verwaltet FONDR automatisch.
+          Aenderungen in dieser Karte werden erst nach dem Speichern uebernommen.
         </p>
 
         <button
