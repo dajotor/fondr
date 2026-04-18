@@ -31,10 +31,18 @@ export function AllocationRuleCard({
   );
   const suggestedContributionCap =
     etf.portfolioCostBasis === null ? "" : etf.portfolioCostBasis.toFixed(2);
+  const hasSavedRule = rule !== null;
+  const savedIsActive = rule?.isActive ?? false;
+  const cardIsHighlighted = hasSavedRule && savedIsActive;
+  const statusBadgeLabel = hasSavedRule
+    ? savedIsActive
+      ? "Aktiv bespart"
+      : "Derzeit pausiert"
+    : "Noch keine Regel";
   const [isActive, setIsActive] = useState(
     state.fieldValues.isActive
       ? state.fieldValues.isActive === "true"
-      : (rule?.isActive ?? true),
+      : savedIsActive,
   );
   const [targetPercentage, setTargetPercentage] = useState(
     state.fieldValues.targetPercentage || (rule?.targetPercentage?.toString() ?? ""),
@@ -49,9 +57,9 @@ export function AllocationRuleCard({
     setIsActive(
       state.fieldValues.isActive
         ? state.fieldValues.isActive === "true"
-        : (rule?.isActive ?? true),
+        : savedIsActive,
     );
-  }, [rule?.isActive, state.fieldValues.isActive]);
+  }, [savedIsActive, state.fieldValues.isActive]);
 
   useEffect(() => {
     setTargetPercentage(
@@ -71,7 +79,7 @@ export function AllocationRuleCard({
     <form
       action={formAction}
       className={`rounded-[calc(var(--radius)+2px)] border bg-background/80 p-4 transition ${
-        isActive
+        cardIsHighlighted
           ? "border-cyan-300/30 shadow-[0_0_0_1px_rgba(103,232,249,0.08)]"
           : "border-border/80"
       }`}
@@ -87,12 +95,14 @@ export function AllocationRuleCard({
               <p className="text-sm font-medium text-foreground">{etf.etfName}</p>
               <span
                 className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium ${
-                  isActive
+                  cardIsHighlighted
                     ? "border-cyan-300/25 bg-cyan-300/10 text-cyan-100"
-                    : "border-border bg-card text-muted-foreground"
+                    : hasSavedRule
+                      ? "border-border bg-card text-muted-foreground"
+                      : "border-border/80 bg-card/70 text-muted-foreground"
                 }`}
               >
-                {isActive ? "Aktiv bespart" : "Derzeit pausiert"}
+                {statusBadgeLabel}
               </span>
             </div>
             <p className="text-xs text-muted-foreground">{etf.isin}</p>
@@ -143,13 +153,17 @@ export function AllocationRuleCard({
               <p className="text-xs text-muted-foreground">
                 Aktuell geplant mit {formatPercentage(Number(targetPercentage))}.
               </p>
-            ) : isActive ? (
+            ) : savedIsActive ? (
               <p className="text-xs text-muted-foreground">
                 Ohne Anteil bleibt dieser ETF im neuen Standardmodell unvollständig konfiguriert.
               </p>
+            ) : hasSavedRule ? (
+              <p className="text-xs text-muted-foreground">
+                Dieser ETF ist gespeichert pausiert und wird aktuell nicht automatisch bespart.
+              </p>
             ) : (
               <p className="text-xs text-muted-foreground">
-                Pausierte ETFs werden aktuell nicht automatisch bespart.
+                Lege bei Bedarf einen Anteil fest und speichere die Regel, um diesen ETF in den Sparplan aufzunehmen.
               </p>
             )}
           </div>
@@ -255,6 +269,10 @@ export function AllocationRuleCard({
             {state.error}
           </p>
         ) : null}
+
+        <p className="text-xs text-muted-foreground">
+          Status, Hervorhebung und Zusammenfassung beziehen sich auf die gespeicherte Regel. Aenderungen im Formular werden erst nach dem Speichern uebernommen.
+        </p>
 
         <button
           type="submit"
