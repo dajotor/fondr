@@ -96,7 +96,7 @@ export function AllocationRuleCard({
     etf.portfolioCostBasis !== null &&
     etf.portfolioCostBasis >= parsedContributionCap;
   const cardClasses = capReached
-    ? "border-amber-300/30 bg-amber-500/[0.04] shadow-[0_0_0_1px_rgba(252,211,77,0.06)]"
+    ? "border-slate-500/70 bg-slate-900/35 shadow-[0_0_0_1px_rgba(148,163,184,0.08)]"
     : isActive
       ? "border-cyan-300/30 shadow-[0_0_0_1px_rgba(103,232,249,0.08)]"
       : "border-slate-800/80 bg-slate-950/20";
@@ -194,7 +194,7 @@ export function AllocationRuleCard({
                 </div>
                 <span className="text-xs text-muted-foreground">
                   {capReached
-                    ? "derzeit erreicht"
+                    ? "derzeit pausiert"
                     : hasContributionCap
                       ? "gesetzt"
                       : "aus"}
@@ -221,7 +221,7 @@ export function AllocationRuleCard({
                     onClick={() => setContributionCap(suggestedContributionCap)}
                     className="inline-flex h-8 items-center justify-center rounded-full border border-border bg-card px-3 text-xs font-medium text-foreground transition hover:bg-secondary"
                   >
-                    Portfolio-Kostenbasis uebernehmen
+                    Portfolio-Kostenbasis übernehmen
                   </button>
                   <button
                     type="button"
@@ -239,7 +239,7 @@ export function AllocationRuleCard({
               ) : (
                 <p className="text-xs text-muted-foreground">
                   {etf.portfolioCostBasis !== null
-                    ? `${rule?.contributionCap ? `Aktuell ${formatCurrency(rule.contributionCap)}. ` : ""}Portfolio-Referenz aus Kostenbasis (Einstandskurs x Stueckzahl): ${formatCurrency(etf.portfolioCostBasis)}. Wenn du diesen Wert als Cap speicherst, gilt der ETF ab dann als voll und bekommt keine neuen Einzahlungen mehr.`
+                    ? `${rule?.contributionCap ? `Aktuell ${formatCurrency(rule.contributionCap)}. ` : ""}Portfolio-Referenz aus Kostenbasis (Einstandskurs x Stückzahl): ${formatCurrency(etf.portfolioCostBasis)}. Wenn du diesen Wert als Cap speicherst, pausieren neue Einzahlungen ab dann automatisch.`
                     : rule?.contributionCap
                       ? `Aktuell ${formatCurrency(rule.contributionCap)}. Das Cap bezieht sich auf kumulierte Einzahlungen, nicht auf den Marktwert.`
                       : "Leer lassen fuer unbegrenzten ETF. Das Cap bezieht sich auf kumulierte Einzahlungen, nicht auf den Marktwert."}
@@ -257,7 +257,7 @@ export function AllocationRuleCard({
 
         {hasUnsavedChanges ? (
           <p className="text-xs text-muted-foreground">
-            Aenderungen noch nicht gespeichert.
+            Änderungen noch nicht gespeichert.
           </p>
         ) : null}
 
