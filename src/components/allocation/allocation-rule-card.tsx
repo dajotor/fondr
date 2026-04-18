@@ -87,6 +87,7 @@ export function AllocationRuleCard({
       normalizeOptionalNumber(savedTargetPercentage) ||
     normalizeOptionalNumber(contributionCap) !==
       normalizeOptionalNumber(savedContributionCap);
+  const hasVisibleFieldErrors = Object.keys(state.fieldErrors).length > 0;
   const parsedContributionCap = Number(contributionCap);
   const hasContributionCap =
     contributionCap.trim() !== "" && Number.isFinite(parsedContributionCap) && parsedContributionCap > 0;
@@ -160,7 +161,7 @@ export function AllocationRuleCard({
               <p className="text-xs text-muted-foreground">
                 Aktuell geplant mit {formatPercentage(Number(targetPercentage))}.
               </p>
-            ) : savedIsActive ? (
+            ) : isActive ? (
               <p className="text-xs text-muted-foreground">
                 Ohne Anteil bleibt dieser ETF im neuen Standardmodell unvollständig konfiguriert.
               </p>
@@ -249,7 +250,7 @@ export function AllocationRuleCard({
           </details>
         </div>
 
-        {state.error ? (
+        {state.error && !hasVisibleFieldErrors ? (
           <p className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
             {state.error}
           </p>

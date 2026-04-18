@@ -98,7 +98,7 @@ export async function updateAllocationRule(
 
   if (!parsedValues.success) {
     return {
-      error: "Bitte pruefe die markierten Felder.",
+      error: null,
       fieldErrors: mapFieldErrors(parsedValues.error.issues),
       fieldValues: toAllocationRuleFieldValues(formData),
     };
@@ -109,9 +109,9 @@ export async function updateAllocationRule(
 
   if (!hasEtf) {
     return {
-      error: "Der ETF ist nicht mehr im Portfolio vorhanden.",
+      error: null,
       fieldErrors: {
-        etfId: "Bitte waehle einen gueltigen ETF aus dem Portfolio.",
+        etfId: "Bitte wähle einen gültigen ETF aus dem Portfolio.",
       },
       fieldValues: toAllocationRuleFieldValues(formData),
     };
@@ -133,11 +133,10 @@ export async function updateAllocationRule(
     })
   ) {
     return {
-      error:
-        "Die aktiven Zielquoten duerfen zusammen hoechstens 100 % ergeben.",
+      error: null,
       fieldErrors: {
         targetPercentage:
-          "Mit diesem Wert wuerden die aktiven Zielquoten zusammen ueber 100 % liegen.",
+          "Mit diesem Wert würden die aktiven Zielquoten zusammen über 100 % liegen.",
       },
       fieldValues: toAllocationRuleFieldValues(formData),
     };
@@ -169,7 +168,7 @@ export async function updateAllocationRule(
     if (error.code === "23505") {
       return {
         error:
-          "Die Allokationsregel kollidiert mit einer bestehenden Regel. Bitte pruefe den ETF und versuche es erneut.",
+          "Die Allokationsregel kollidiert mit einer bestehenden Regel. Bitte prüfe den ETF und versuche es erneut.",
         fieldErrors: {},
         fieldValues: toAllocationRuleFieldValues(formData),
       };

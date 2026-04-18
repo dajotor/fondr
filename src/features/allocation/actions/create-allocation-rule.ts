@@ -89,7 +89,7 @@ export async function createAllocationRule(
 
   if (!parsedValues.success) {
     return {
-      error: "Bitte pruefe die markierten Felder.",
+      error: null,
       fieldErrors: mapFieldErrors(parsedValues.error.issues),
       fieldValues: toAllocationRuleFieldValues(formData),
     };
@@ -100,9 +100,9 @@ export async function createAllocationRule(
 
   if (!hasEtf) {
     return {
-      error: "Der ETF ist nicht mehr im Portfolio vorhanden.",
+      error: null,
       fieldErrors: {
-        etfId: "Bitte waehle einen gueltigen ETF aus dem Portfolio.",
+        etfId: "Bitte wähle einen gültigen ETF aus dem Portfolio.",
       },
       fieldValues: toAllocationRuleFieldValues(formData),
     };
@@ -121,11 +121,10 @@ export async function createAllocationRule(
     })
   ) {
     return {
-      error:
-        "Die aktiven Zielquoten duerfen zusammen hoechstens 100 % ergeben.",
+      error: null,
       fieldErrors: {
         targetPercentage:
-          "Mit diesem Wert wuerden die aktiven Zielquoten zusammen ueber 100 % liegen.",
+          "Mit diesem Wert würden die aktiven Zielquoten zusammen über 100 % liegen.",
       },
       fieldValues: toAllocationRuleFieldValues(formData),
     };
@@ -153,9 +152,9 @@ export async function createAllocationRule(
     if (error.code === "23505") {
       return {
         error:
-          "Fuer diesen ETF existiert bereits eine Regel oder die automatische Reihenfolge konnte nicht eindeutig vergeben werden. Bitte versuche es erneut.",
+          "Für diesen ETF gibt es bereits eine Regel oder die automatische Reihenfolge konnte nicht eindeutig vergeben werden. Bitte versuche es erneut.",
         fieldErrors: {
-          etfId: "Fuer diesen ETF existiert bereits eine Regel.",
+          etfId: "Für diesen ETF gibt es bereits eine Regel.",
         },
         fieldValues: toAllocationRuleFieldValues(formData),
       };

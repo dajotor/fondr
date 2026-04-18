@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const allocationRuleSchema = z.object({
-  etfId: z.string().uuid("Ungueltiger ETF."),
+  etfId: z.string().uuid("Ungültiger ETF."),
   isActive: z.preprocess(
     (value) => {
       if (value === null || value === undefined || value === "") {
@@ -26,10 +26,10 @@ export const allocationRuleSchema = z.object({
     },
     z.coerce
       .number({
-        invalid_type_error: "Bitte gib eine gueltige Reihenfolge ein.",
+        invalid_type_error: "Bitte gib eine gültige Reihenfolge ein.",
       })
       .int("Die Reihenfolge muss eine ganze Zahl sein.")
-      .positive("Die Reihenfolge muss groesser als 0 sein.")
+      .positive("Die Reihenfolge muss größer als 0 sein.")
       .optional(),
   ),
   contributionCap: z.preprocess(
@@ -43,9 +43,9 @@ export const allocationRuleSchema = z.object({
     z.coerce
       .number({
         invalid_type_error:
-          "Bitte gib eine gueltige Schwelle fuer kumulierte Einzahlungen ein.",
+          "Bitte gib eine gültige Schwelle für kumulierte Einzahlungen ein.",
       })
-      .positive("Die Schwelle fuer kumulierte Einzahlungen muss groesser als 0 sein.")
+      .positive("Die Schwelle für kumulierte Einzahlungen muss größer als 0 sein.")
       .optional(),
   ),
   targetPercentage: z.preprocess(
@@ -58,9 +58,9 @@ export const allocationRuleSchema = z.object({
     },
     z.coerce
       .number({
-        invalid_type_error: "Bitte gib einen gueltigen Anteil ein.",
+        invalid_type_error: "Bitte gib einen gültigen Anteil ein.",
       })
-      .positive("Der Anteil muss groesser als 0 sein.")
+      .positive("Der Anteil muss größer als 0 sein.")
       .max(100, "Der Anteil darf maximal 100 % betragen.")
       .optional(),
   ),
