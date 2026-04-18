@@ -54,6 +54,14 @@ export const allocationRuleSchema = z.object({
         return undefined;
       }
 
+      if (typeof value === "string" || typeof value === "number") {
+        const numericValue = Number(value);
+
+        if (Number.isFinite(numericValue) && numericValue === 0) {
+          return undefined;
+        }
+      }
+
       return value;
     },
     z.coerce
