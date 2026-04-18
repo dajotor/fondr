@@ -65,8 +65,7 @@ export default async function AllocationPage() {
     activeRules.length > 0 &&
     activePercentageTotal < 100 - PERCENTAGE_CONFIGURATION_EPSILON;
   const usesPercentageStandardModel =
-    activeRules.length > 0 &&
-    configuredActiveRules.length === activeRules.length &&
+    configuredActiveRules.length > 0 &&
     !activePercentageOverconfigured &&
     Math.abs(activePercentageTotal - 100) <= PERCENTAGE_CONFIGURATION_EPSILON;
 

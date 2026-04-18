@@ -10,7 +10,7 @@ import {
   initialAllocationRuleFormState,
 } from "@/features/allocation/actions/form-state";
 import { updateAllocationRule } from "@/features/allocation/actions/update-allocation-rule";
-import { formatCurrency, formatCurrencyWhole } from "@/lib/formatting/currency";
+import { formatCurrencyWhole } from "@/lib/formatting/currency";
 import { formatPercentage } from "@/lib/formatting/number";
 
 type AllocationRuleCardProps = {
@@ -103,6 +103,8 @@ export function AllocationRuleCard({
       ? null
       : roundCurrencyToCent(etf.portfolioCostBasis);
   const normalizedTargetPercentage = normalizeOptionalNumber(targetPercentage);
+  const displayedContributionCap =
+    hasContributionCap ? formatCurrencyWhole(parsedContributionCap) : null;
   const capReached =
     isActive &&
     hasContributionCap &&
@@ -252,10 +254,10 @@ export function AllocationRuleCard({
               ) : (
                 <p className="text-xs text-muted-foreground">
                   {etf.portfolioCostBasis !== null
-                    ? `${rule?.contributionCap ? `Aktuell ${formatCurrencyWhole(rule.contributionCap)}. ` : ""}Portfolio-Referenz aus Kostenbasis (Einstandskurs x Stückzahl): ${formatCurrencyWhole(etf.portfolioCostBasis)}. Wenn du diesen Wert als Cap speicherst, pausieren neue Einzahlungen ab dann automatisch.`
-                    : rule?.contributionCap
-                      ? `Aktuell ${formatCurrencyWhole(rule.contributionCap)}. Das Cap bezieht sich auf kumulierte Einzahlungen, nicht auf den Marktwert.`
-                      : "Leer lassen fuer unbegrenzten ETF. Das Cap bezieht sich auf kumulierte Einzahlungen, nicht auf den Marktwert."}
+                    ? `${displayedContributionCap ? `Aktuell ${displayedContributionCap}. ` : ""}Portfolio-Referenz aus Kostenbasis (Einstandskurs x Stückzahl): ${formatCurrencyWhole(etf.portfolioCostBasis)}. Wenn du diesen Wert als Cap speicherst, pausieren neue Einzahlungen ab dann automatisch.`
+                    : displayedContributionCap
+                      ? `Aktuell ${displayedContributionCap}. Das Cap bezieht sich auf kumulierte Einzahlungen, nicht auf den Marktwert.`
+                      : "Leer lassen für unbegrenzten ETF. Das Cap bezieht sich auf kumulierte Einzahlungen, nicht auf den Marktwert."}
                 </p>
               )}
             </div>
