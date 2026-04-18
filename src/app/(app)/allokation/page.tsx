@@ -58,9 +58,16 @@ export default async function AllocationPage() {
     (sum, rule) => sum + (rule.targetPercentage ?? 0),
     0,
   );
+  const activePercentageOverconfigured =
+    activePercentageTotal - 100 > PERCENTAGE_CONFIGURATION_EPSILON;
+  const activePercentageIncomplete =
+    !activePercentageOverconfigured &&
+    activeRules.length > 0 &&
+    activePercentageTotal < 100 - PERCENTAGE_CONFIGURATION_EPSILON;
   const usesPercentageStandardModel =
     activeRules.length > 0 &&
     configuredActiveRules.length === activeRules.length &&
+    !activePercentageOverconfigured &&
     Math.abs(activePercentageTotal - 100) <= PERCENTAGE_CONFIGURATION_EPSILON;
 
   return (
@@ -132,7 +139,11 @@ export default async function AllocationPage() {
                   {formatPercentage(activePercentageTotal)}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Nur aktive ETFs mit hinterlegtem Anteil werden mitgezählt.
+                  {activePercentageOverconfigured
+                    ? "So ist die Verteilung noch nicht gueltig. Bitte reduziere die aktiven Zielquoten zusammen auf hoechstens 100 %."
+                    : activePercentageIncomplete
+                      ? "Der verbleibende Anteil bleibt vorerst unverplant und wird als Reserve weitergefuehrt."
+                      : "Nur aktive ETFs mit hinterlegtem Anteil werden mitgezaehlt."}
                 </p>
               </div>
               <div className="space-y-1">
@@ -142,12 +153,16 @@ export default async function AllocationPage() {
                 <p className="text-sm font-medium text-foreground">
                   {usesPercentageStandardModel
                     ? "Prozent-Allokation aktiv"
-                    : "Prozent-Allokation noch nicht vollstaendig"}
+                    : activePercentageOverconfigured
+                      ? "Zielquoten bitte anpassen"
+                      : "Prozent-Allokation noch nicht vollstaendig"}
                 </p>
                 <p className="text-xs leading-5 text-muted-foreground">
                   {usesPercentageStandardModel
                     ? "Die automatische Verteilung kann mit deinen aktiven Zielquoten rechnen."
-                    : "Sobald alle aktiven ETFs einen Anteil haben und zusammen 100 % ergeben, verteilt FONDR neue Einzahlungen automatisch danach."}
+                    : activePercentageOverconfigured
+                      ? "Die aktiven Zielquoten duerfen zusammen nicht ueber 100 % liegen."
+                      : "Sobald alle aktiven ETFs einen Anteil haben und zusammen 100 % ergeben, verteilt FONDR neue Einzahlungen automatisch danach."}
                 </p>
               </div>
             </div>

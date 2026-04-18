@@ -9,9 +9,12 @@ import {
   toAllocationRuleFieldValues,
   type AllocationRuleFormState,
 } from "@/features/allocation/actions/form-state";
+import { getAllocationRules } from "@/features/allocation/queries/get-allocation-rules";
 import { getPortfolioAllocationEtfs } from "@/features/allocation/queries/get-portfolio-allocation-etfs";
 import { allocationRuleSchema } from "@/features/allocation/validators/allocation-rule.schema";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+const PERCENTAGE_CONFIGURATION_EPSILON = 0.01;
 
 async function resolveNextSequenceOrder(userId: string) {
   const supabase = await createSupabaseServerClient();
@@ -50,6 +53,22 @@ function mapFieldErrors(
   return fieldErrors;
 }
 
+function exceedsActiveTargetPercentageLimit(params: {
+  existingRulePercentages: number[];
+  nextIsActive: boolean;
+  nextTargetPercentage: number | undefined;
+}) {
+  const existingTotal = params.existingRulePercentages.reduce(
+    (sum, percentage) => sum + percentage,
+    0,
+  );
+  const nextTotal =
+    existingTotal +
+    (params.nextIsActive ? (params.nextTargetPercentage ?? 0) : 0);
+
+  return nextTotal - 100 > PERCENTAGE_CONFIGURATION_EPSILON;
+}
+
 export async function createAllocationRule(
   _previousState: AllocationRuleFormState,
   formData: FormData,
@@ -84,6 +103,29 @@ export async function createAllocationRule(
       error: "Der ETF ist nicht mehr im Portfolio vorhanden.",
       fieldErrors: {
         etfId: "Bitte waehle einen gueltigen ETF aus dem Portfolio.",
+      },
+      fieldValues: toAllocationRuleFieldValues(formData),
+    };
+  }
+
+  const existingRules = await getAllocationRules(user.id);
+  const existingActivePercentages = existingRules
+    .filter((rule) => rule.isActive && rule.targetPercentage !== null)
+    .map((rule) => rule.targetPercentage as number);
+
+  if (
+    exceedsActiveTargetPercentageLimit({
+      existingRulePercentages: existingActivePercentages,
+      nextIsActive: parsedValues.data.isActive,
+      nextTargetPercentage: parsedValues.data.targetPercentage,
+    })
+  ) {
+    return {
+      error:
+        "Die aktiven Zielquoten duerfen zusammen hoechstens 100 % ergeben.",
+      fieldErrors: {
+        targetPercentage:
+          "Mit diesem Wert wuerden die aktiven Zielquoten zusammen ueber 100 % liegen.",
       },
       fieldValues: toAllocationRuleFieldValues(formData),
     };
