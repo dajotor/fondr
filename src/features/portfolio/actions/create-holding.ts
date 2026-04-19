@@ -21,6 +21,18 @@ import { getOrCreatePrimaryPortfolio } from "@/features/portfolio/queries/get-or
 import { holdingFormSchema, type HoldingFormValues } from "@/features/portfolio/validators/holding-form.schema";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+function mapHoldingPersistenceValues(values: HoldingFormValues) {
+  const quantity = values.quantity ?? 0;
+
+  return {
+    quantity: quantity.toString(),
+    costBasisPerShare:
+      values.costBasisPerShare === undefined
+        ? null
+        : values.costBasisPerShare.toString(),
+  };
+}
+
 async function insertHolding(values: HoldingFormValues, userId: string) {
   const supabase = await createSupabaseServerClient();
   const portfolio = await getOrCreatePrimaryPortfolio(userId);
@@ -28,14 +40,15 @@ async function insertHolding(values: HoldingFormValues, userId: string) {
     isin: values.isin,
     name: values.name,
   });
+  const persistenceValues = mapHoldingPersistenceValues(values);
 
   const { error } = await supabase.from("portfolio_holdings").insert({
     portfolio_id: portfolio.id,
     etf_id: etf.id,
     isin_snapshot: etf.isin,
     name_snapshot: etf.name,
-    quantity: values.quantity.toString(),
-    cost_basis_per_share: values.costBasisPerShare.toString(),
+    quantity: persistenceValues.quantity,
+    cost_basis_per_share: persistenceValues.costBasisPerShare,
     unit_price_manual:
       values.unitPriceManual === undefined
         ? null

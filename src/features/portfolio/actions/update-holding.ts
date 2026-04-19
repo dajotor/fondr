@@ -21,6 +21,21 @@ import { getOrCreatePrimaryPortfolio } from "@/features/portfolio/queries/get-or
 import { holdingFormSchema } from "@/features/portfolio/validators/holding-form.schema";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+function mapHoldingPersistenceValues(values: {
+  quantity?: number;
+  costBasisPerShare?: number;
+}) {
+  const quantity = values.quantity ?? 0;
+
+  return {
+    quantity: quantity.toString(),
+    costBasisPerShare:
+      values.costBasisPerShare === undefined
+        ? null
+        : values.costBasisPerShare.toString(),
+  };
+}
+
 export async function updateHolding(
   _previousState: HoldingFormState,
   formData: FormData,
@@ -64,6 +79,7 @@ export async function updateHolding(
     isin: parsedValues.data.isin,
     name: parsedValues.data.name,
   });
+  const persistenceValues = mapHoldingPersistenceValues(parsedValues.data);
 
   const { error } = await supabase
     .from("portfolio_holdings")
@@ -71,8 +87,8 @@ export async function updateHolding(
       etf_id: etf.id,
       isin_snapshot: etf.isin,
       name_snapshot: etf.name,
-      quantity: parsedValues.data.quantity.toString(),
-      cost_basis_per_share: parsedValues.data.costBasisPerShare.toString(),
+      quantity: persistenceValues.quantity,
+      cost_basis_per_share: persistenceValues.costBasisPerShare,
       unit_price_manual:
         parsedValues.data.unitPriceManual === undefined
           ? null

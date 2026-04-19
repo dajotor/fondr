@@ -12,8 +12,8 @@ export default function NewPortfolioHoldingPage() {
             ETF zum Portfolio hinzufuegen
           </h2>
           <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-            Erfasse ISIN, Name, Stueckzahl und den durchschnittlichen Einstandskurs.
-            Bekannte ISINs koennen mit einfachen Mock-Daten unterstuetzen.
+            Erfasse ISIN und Name. Stückzahl und Einstandskurs kannst du auch
+            später ergänzen, wenn du den ETF erst künftig besparen möchtest.
           </p>
         </div>
       </div>

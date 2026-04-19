@@ -305,7 +305,7 @@ export function HoldingForm({
 
         <div className="space-y-2">
           <label htmlFor="quantity" className="text-sm font-medium text-foreground/90">
-            Stueckzahl
+            Stückzahl (optional)
           </label>
           <input
             id="quantity"
@@ -314,10 +314,13 @@ export function HoldingForm({
             step="0.0001"
             min="0"
             defaultValue={quantityDefaultValue}
-            required
             className="h-12 w-full rounded-2xl border border-input bg-background px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20"
           />
           <FieldError error={state.fieldErrors.quantity} />
+          <p className="text-xs text-muted-foreground">
+            Wenn du diesen ETF noch nicht besitzt, kannst du Stückzahl und
+            Einstandskurs leer lassen. Du kannst beides später ergänzen.
+          </p>
         </div>
 
         <div className="space-y-2">
@@ -325,7 +328,7 @@ export function HoldingForm({
             htmlFor="costBasisPerShare"
             className="text-sm font-medium text-foreground/90"
           >
-            Einstandskurs pro Anteil
+            Einstandskurs pro Anteil (optional)
           </label>
           <input
             id="costBasisPerShare"
@@ -335,13 +338,12 @@ export function HoldingForm({
             min="0"
             defaultValue={costBasisDefaultValue}
             placeholder="103.45"
-            required
             className="h-12 w-full rounded-2xl border border-input bg-background px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20"
           />
           <FieldError error={state.fieldErrors.costBasisPerShare} />
           <p className="text-xs text-muted-foreground">
-            Durchschnittlicher Kaufkurs je Anteil. Zusammen mit der Stueckzahl ergibt
-            das die Kostenbasis dieses ETFs.
+            Wenn du diesen ETF noch nicht besitzt, kannst du Stückzahl und
+            Einstandskurs leer lassen. Du kannst beides später ergänzen.
           </p>
         </div>
 
