@@ -17,6 +17,7 @@ const ROUNDING_STEP = 100;
 const MAX_MONTHLY_CONTRIBUTION = 100000;
 const MAX_BINARY_SEARCH_ITERATIONS = 14;
 export const GOAL_MONTE_CARLO_RUNS = 10000;
+export const GOAL_MONTE_CARLO_RUNS_SEARCH = 2500;
 export const GOAL_MONTE_CARLO_SEED = 20260419;
 const LEAN_PLAN_REQUIRED_PROBABILITY = 0.6;
 const SAFE_PLAN_REQUIRED_PROBABILITY = 0.9;
@@ -266,7 +267,7 @@ export function findRequiredMonthlyContribution(params: {
     const simulation = runMonteCarloSimulation({
       assumptions,
       allocationTimeline,
-      runs: GOAL_MONTE_CARLO_RUNS,
+      runs: GOAL_MONTE_CARLO_RUNS_SEARCH,
       seed: GOAL_MONTE_CARLO_SEED,
     });
     const evaluation = evaluateGoalAgainstSimulation({
