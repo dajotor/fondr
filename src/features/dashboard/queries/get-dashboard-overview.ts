@@ -271,6 +271,13 @@ export async function getDashboardOverview(
     getProjectionAssumptions(userId),
     getGoalSettings(userId),
   ]);
+  const validEtfIds = new Set(portfolioEtfs.map((etf) => etf.etfId));
+  const validAllocationRules = allocationRules.filter((rule) =>
+    validEtfIds.has(rule.etfId),
+  );
+  const validOverrides = overrides.filter((override) =>
+    validEtfIds.has(override.etfId),
+  );
   const dashboardForecastMonthsAhead = Math.max(
     years * 12,
     1,
@@ -291,15 +298,15 @@ export async function getDashboardOverview(
   );
   const allocationTimeline = buildAllocationTimelinePreview(
     contributionTimeline,
-    allocationRules,
-    overrides,
+    validAllocationRules,
+    validOverrides,
     portfolioEtfs,
   );
 
   const nextMonthContribution = contributionTimeline.at(1)?.totalAmount ?? 0;
   const hasContributionPlan =
     contributionRules.length > 0 || lumpSums.length > 0;
-  const hasAllocationSetup = allocationRules.some(
+  const hasAllocationSetup = validAllocationRules.some(
     (rule) => rule.isActive && (rule.targetPercentage ?? 0) > PERCENTAGE_CONFIGURATION_EPSILON,
   );
   const hasAssumptions = assumptions.length > 0;
@@ -366,7 +373,7 @@ export async function getDashboardOverview(
           assumptions,
           contributionRules,
           lumpSums,
-          allocationRules,
+          allocationRules: validAllocationRules,
           allocationTimeline,
         })
       : assumptions.length > 0
@@ -374,7 +381,7 @@ export async function getDashboardOverview(
             assumptions,
             contributionRules,
             lumpSums,
-            allocationRules,
+            allocationRules: validAllocationRules,
             allocationTimeline,
           })
         : buildContributionNotices({
@@ -385,7 +392,7 @@ export async function getDashboardOverview(
     portfolioOverview,
     contributionRules,
     lumpSums,
-    allocationRules,
+    allocationRules: validAllocationRules,
     notices: notices.filter((notice) => notice.category !== "model"),
     goalSettings,
   });

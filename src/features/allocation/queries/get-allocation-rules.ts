@@ -1,4 +1,5 @@
 import type { AllocationRuleView } from "@/domain/allocation/types";
+import { getPortfolioAllocationEtfs } from "@/features/allocation/queries/get-portfolio-allocation-etfs";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type AllocationRuleRow = {
@@ -99,6 +100,9 @@ export async function getAllocationRules(
   userId: string,
 ): Promise<AllocationRuleView[]> {
   const supabase = await createSupabaseServerClient();
+  const validEtfIds = new Set(
+    (await getPortfolioAllocationEtfs(userId)).map((etf) => etf.etfId),
+  );
   const { data, error } = await supabase
     .from("allocation_rules")
     .select(
@@ -108,7 +112,9 @@ export async function getAllocationRules(
     .order("sequence_order", { ascending: true });
 
   if (!error) {
-    return ((data ?? []) as AllocationRuleRow[]).map(mapAllocationRuleRow);
+    return ((data ?? []) as AllocationRuleRow[])
+      .map(mapAllocationRuleRow)
+      .filter((rule) => validEtfIds.has(rule.etfId));
   }
 
   if (!isMissingPreparedAllocationColumnsError(error)) {
@@ -127,7 +133,7 @@ export async function getAllocationRules(
     throw new Error("Failed to load allocation rules.");
   }
 
-  return ((legacyData ?? []) as LegacyAllocationRuleRow[]).map(
-    mapLegacyAllocationRuleRow,
-  );
+  return ((legacyData ?? []) as LegacyAllocationRuleRow[])
+    .map(mapLegacyAllocationRuleRow)
+    .filter((rule) => validEtfIds.has(rule.etfId));
 }
