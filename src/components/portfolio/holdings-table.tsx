@@ -8,6 +8,10 @@ type HoldingsTableProps = {
   holdings: PortfolioHoldingView[];
 };
 
+function hasMissingStartingValue(holding: PortfolioHoldingView) {
+  return holding.quantity <= 0 || holding.costBasisPerShare === null;
+}
+
 function getHoldingSourceLabel(dataSource: PortfolioHoldingView["dataSource"]) {
   if (dataSource === "provider") {
     return "Referenzdaten vom Anbieter";
@@ -34,6 +38,11 @@ export function HoldingsTable({ holdings }: HoldingsTableProps) {
                 {holding.name}
               </p>
               <p className="text-xs text-muted-foreground">{holding.isin}</p>
+              {hasMissingStartingValue(holding) ? (
+                <p className="text-xs text-orange-200">
+                  Startwert fehlt
+                </p>
+              ) : null}
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
@@ -120,6 +129,11 @@ export function HoldingsTable({ holdings }: HoldingsTableProps) {
                       <p className="text-xs text-muted-foreground">
                         {getHoldingSourceLabel(holding.dataSource)}
                       </p>
+                      {hasMissingStartingValue(holding) ? (
+                        <p className="text-xs text-orange-200">
+                          Startwert fehlt
+                        </p>
+                      ) : null}
                     </div>
                   </td>
                   <td className="px-5 py-4 text-sm text-muted-foreground">

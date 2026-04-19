@@ -7,7 +7,6 @@ import { ProjectionChart } from "@/components/analysis/projection-chart";
 import { ProjectionEtfBreakdown } from "@/components/analysis/projection-etf-breakdown";
 import { ProjectionMilestones } from "@/components/analysis/projection-milestones";
 import { ProjectionSummary } from "@/components/analysis/projection-summary";
-import { NoticeList } from "@/components/ui/notice-list";
 import { buildAllocationTimelinePreview } from "@/features/allocation/lib/calculate";
 import { normalizeAnalysisYears } from "@/features/analysis/lib/horizon";
 import { runMonteCarloSimulation } from "@/features/analysis/lib/monte-carlo";
@@ -113,8 +112,6 @@ export default async function AnalysisPage({ searchParams }: AnalysisPageProps) 
         </div>
       ) : (
         <>
-          <NoticeList title="Einordnung" items={notices} />
-
           <AnalysisHorizonNav years={years} />
 
           <div className="app-card">
@@ -198,6 +195,26 @@ export default async function AnalysisPage({ searchParams }: AnalysisPageProps) 
                   Werte machen die Ergebnisse oft besser einordbar.
                 </p>
               </div>
+
+            {notices
+              .filter((notice) =>
+                notice.id === "analysis-high-return" ||
+                notice.id === "analysis-high-ter" ||
+                notice.id === "analysis-high-volatility",
+              )
+              .map((notice) => (
+                <details
+                  key={notice.id}
+                  className="mb-4 text-sm text-foreground"
+                >
+                  <summary className="cursor-pointer list-none font-medium">
+                    {notice.title}
+                  </summary>
+                  <p className="mt-2 leading-6 text-muted-foreground">
+                    {notice.body}
+                  </p>
+                </details>
+              ))}
 
             <div className="grid gap-4 xl:grid-cols-2">
               {assumptions.map((assumption) => (

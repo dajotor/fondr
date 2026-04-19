@@ -10,7 +10,6 @@ import { buildContributionTimelinePreview } from "@/features/contributions/lib/t
 import { getContributionRules } from "@/features/contributions/queries/get-contribution-rules";
 import { getLumpSumContributions } from "@/features/contributions/queries/get-lump-sum-contributions";
 import { requireUser } from "@/lib/auth/guard";
-import { NoticeList } from "@/components/ui/notice-list";
 import { buildAllocationNotices } from "@/lib/plausibility";
 import { formatPercentage } from "@/lib/formatting/number";
 
@@ -91,9 +90,6 @@ export default async function AllocationPage() {
           <div className="app-accent-line max-w-2xl" />
         </div>
       </div>
-
-      <NoticeList title="Einordnung" items={notices} />
-
       {portfolioEtfs.length === 0 ? (
         <div className="rounded-[calc(var(--radius)+2px)] border border-border bg-background/80 p-6 md:p-8">
           <h3 className="text-xl font-semibold tracking-tight text-foreground">
@@ -164,6 +160,36 @@ export default async function AllocationPage() {
                 </p>
               </div>
             </div>
+
+            {notices
+              .filter((notice) =>
+                notice.id === "allocation-no-rules" ||
+                notice.id === "allocation-unallocated",
+              )
+              .map((notice) => (
+                <p
+                  key={notice.id}
+                  className="mb-3 text-sm leading-6 text-muted-foreground"
+                >
+                  {notice.body}
+                </p>
+              ))}
+
+            {notices
+              .filter((notice) => notice.id === "overlap-global-equity-core")
+              .map((notice) => (
+                <details
+                  key={notice.id}
+                  className="mb-3 text-sm text-foreground"
+                >
+                  <summary className="cursor-pointer list-none font-medium">
+                    {notice.title}
+                  </summary>
+                  <p className="mt-2 leading-6 text-muted-foreground">
+                    {notice.body}
+                  </p>
+                </details>
+              ))}
 
             <div className="grid gap-4 xl:grid-cols-2">
               {portfolioEtfs.map((etf) => (

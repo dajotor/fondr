@@ -7,7 +7,6 @@ import { buildContributionTimelinePreview } from "@/features/contributions/lib/t
 import { getContributionRules } from "@/features/contributions/queries/get-contribution-rules";
 import { getLumpSumContributions } from "@/features/contributions/queries/get-lump-sum-contributions";
 import { requireUser } from "@/lib/auth/guard";
-import { NoticeList } from "@/components/ui/notice-list";
 import { buildContributionNotices } from "@/lib/plausibility";
 
 export default async function ContributionsPage() {
@@ -46,7 +45,17 @@ export default async function ContributionsPage() {
         </div>
       </div>
 
-      <NoticeList title="Einordnung" items={notices} />
+      {notices.some((notice) => notice.id === "contributions-no-recurring") ? (
+        <p className="text-sm leading-6 text-muted-foreground">
+          Bisher fließen nur Sonderzahlungen ein. Für einen regelmäßigen Plan
+          fehlt noch ein Monatsbeitrag.
+        </p>
+      ) : notices.some((notice) => notice.id === "contributions-empty") ? (
+        <p className="text-sm leading-6 text-muted-foreground">
+          Lege einen Monatsbeitrag oder eine erste Sonderzahlung an, damit deine
+          Planung in die Zukunft weiterläuft.
+        </p>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-2">
         <div className="rounded-[calc(var(--radius)+2px)] border border-border bg-background/80 p-6 md:p-8">

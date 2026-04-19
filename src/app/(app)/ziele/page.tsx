@@ -2,7 +2,6 @@ import { GoalOptimizationCard } from "@/components/goals/goal-optimization-card"
 import { GoalPlanComparison } from "@/components/goals/goal-plan-comparison";
 import { GoalSettingsForm } from "@/components/goals/goal-settings-form";
 import { GoalStatusCards } from "@/components/goals/goal-status-cards";
-import { NoticeList } from "@/components/ui/notice-list";
 import type { GoalSettings } from "@/domain/goals/types";
 import { getAllocationRules } from "@/features/allocation/queries/get-allocation-rules";
 import { getManualAllocationOverrides } from "@/features/allocation/queries/get-manual-allocation-overrides";
@@ -162,9 +161,6 @@ export default async function GoalsPage() {
           <div className="app-accent-line max-w-2xl" />
         </div>
       </div>
-
-      <NoticeList title="Einordnung" items={notices} />
-
       <div className="app-card">
         <div className="mb-6 space-y-2">
           <h3 className="text-xl font-semibold tracking-tight text-foreground">
@@ -176,12 +172,37 @@ export default async function GoalsPage() {
           </p>
         </div>
         <GoalSettingsForm goalSettings={goalSettings} />
+        {notices
+          .filter((notice) => notice.id === "goal-horizon-adjusted")
+          .map((notice) => (
+            <p
+              key={notice.id}
+              className="mt-4 text-sm leading-6 text-muted-foreground"
+            >
+              {notice.body}
+            </p>
+          ))}
       </div>
 
       <GoalStatusCards
         goalSettings={goalSettings}
         evaluation={currentEvaluation}
       />
+      {notices
+        .filter((notice) => notice.category === "plausibility" && notice.id.startsWith("goal-"))
+        .map((notice) => (
+          <details
+            key={notice.id}
+            className="text-sm text-foreground"
+          >
+            <summary className="cursor-pointer list-none font-medium">
+              {notice.title}
+            </summary>
+            <p className="mt-2 leading-6 text-muted-foreground">
+              {notice.body}
+            </p>
+          </details>
+        ))}
       <p className="text-xs leading-6 text-muted-foreground">
         Vereinfachtes Modell: ohne Steuern, Inflation, Rebalancing und
         Entnahme. Monte-Carlo zeigt Bandbreiten, keine Garantie.

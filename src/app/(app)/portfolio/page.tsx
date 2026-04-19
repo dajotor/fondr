@@ -3,17 +3,12 @@ import Link from "next/link";
 import { EmptyPortfolioState } from "@/components/portfolio/empty-portfolio-state";
 import { HoldingsTable } from "@/components/portfolio/holdings-table";
 import { PortfolioSummary } from "@/components/portfolio/portfolio-summary";
-import { NoticeList } from "@/components/ui/notice-list";
 import { getPortfolioOverview } from "@/features/portfolio/queries/get-portfolio-overview";
 import { requireUser } from "@/lib/auth/guard";
-import { buildEtfOverlapNotices } from "@/lib/plausibility";
 
 export default async function PortfolioPage() {
   const user = await requireUser();
   const overview = await getPortfolioOverview(user.id);
-  const notices = buildEtfOverlapNotices(
-    overview.holdings.map((holding) => holding.name),
-  );
 
   return (
     <section className="space-y-8">
@@ -45,9 +40,6 @@ export default async function PortfolioPage() {
           </Link>
         </div>
       </div>
-
-      <NoticeList title="Einordnung" items={notices} />
-
       {overview.holdingCount === 0 ? (
         <EmptyPortfolioState />
       ) : (
