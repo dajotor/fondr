@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CalendarPlus, PieChart } from "lucide-react";
 
@@ -35,6 +35,14 @@ export function MobileMoreSheet({
   isOpen,
   onClose,
 }: MobileMoreSheetProps) {
+  const [hasEverOpened, setHasEverOpened] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setHasEverOpened(true);
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen) {
       return undefined;
@@ -53,18 +61,31 @@ export function MobileMoreSheet({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) {
+  if (!hasEverOpened) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
+    <div
+      className={`fixed inset-0 z-50 md:hidden ${
+        isOpen ? "pointer-events-auto" : "pointer-events-none"
+      }`}
+      role="dialog"
+      aria-modal={isOpen}
+      aria-hidden={!isOpen}
+    >
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-200 ${
+          isOpen ? "opacity-100" : "opacity-0"
+        }`}
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="absolute inset-x-0 bottom-0 rounded-t-[20px] border-t border-border bg-[#070909]/98 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-2 shadow-[0_-12px_28px_rgba(0,0,0,0.4)]">
+      <div
+        className={`absolute inset-x-0 bottom-0 rounded-t-[20px] border-t border-border bg-[#070909]/98 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-2 shadow-[0_-12px_28px_rgba(0,0,0,0.4)] transition-transform duration-[250ms] ease-out ${
+          isOpen ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
         <div
           className="mx-auto mb-4 h-1 w-10 rounded-full bg-border"
           aria-hidden="true"
