@@ -1,4 +1,9 @@
-import type { DashboardNextAction, DashboardOverview } from "@/domain/dashboard/types";
+import type {
+  DashboardOverview,
+  DashboardSetupStep,
+  DashboardSetupStepKey,
+  DashboardSetupStepStatus,
+} from "@/domain/dashboard/types";
 import { buildAllocationTimelinePreview } from "@/features/allocation/lib/calculate";
 import { getAllocationRules } from "@/features/allocation/queries/get-allocation-rules";
 import { getManualAllocationOverrides } from "@/features/allocation/queries/get-manual-allocation-overrides";
@@ -17,67 +22,219 @@ import {
 import { getPortfolioOverview } from "@/features/portfolio/queries/get-portfolio-overview";
 import { getGoalSettings } from "@/features/goals/queries/get-goal-settings";
 import { evaluateGoalAgainstSimulation, getTargetMonthIndex } from "@/features/goals/lib/goal-optimization";
+import { formatCurrencyWhole } from "@/lib/formatting/currency";
+import { formatPercentage } from "@/lib/formatting/number";
+import type { PlausibilityNotice } from "@/lib/plausibility";
+import { formatMonthLabel } from "@/features/contributions/lib/months";
 
-function buildNextActions(params: {
-  hasPortfolio: boolean;
-  hasContributionPlan: boolean;
-  hasAllocationSetup: boolean;
-  hasGoalSettings: boolean;
-  hasAssumptions: boolean;
-}): DashboardNextAction[] {
-  const actions: DashboardNextAction[] = [];
+const PERCENTAGE_CONFIGURATION_EPSILON = 0.01;
 
-  if (!params.hasPortfolio) {
-    actions.push({
-      id: "action-portfolio",
-      title: "Portfolio erfassen",
-      body: "Lege zuerst mindestens einen ETF an. Ohne Portfolio bleiben Analyse und Ziele sehr begrenzt.",
-      href: "/portfolio/new",
-      label: "Zum Portfolio",
-    });
+function mapNoticeToStepKey(notice: PlausibilityNotice): DashboardSetupStepKey | null {
+  if (
+    notice.id === "contributions-empty" ||
+    notice.id === "contributions-no-recurring"
+  ) {
+    return "contributions";
   }
 
-  if (!params.hasContributionPlan) {
-    actions.push({
-      id: "action-contributions",
-      title: "Einzahlungen planen",
-      body: "Lege eine laufende Monatsrate oder eine erste Sonderzahlung an, damit die Planung ueberhaupt in die Zukunft weiterlaeuft.",
-      href: "/einzahlungen",
-      label: "Einzahlungen anlegen",
-    });
+  if (
+    notice.id === "allocation-no-rules" ||
+    notice.id === "allocation-unallocated" ||
+    notice.id === "analysis-no-allocation" ||
+    notice.id === "analysis-unallocated" ||
+    notice.id === "analysis-high-return" ||
+    notice.id === "analysis-high-ter" ||
+    notice.id === "analysis-high-volatility" ||
+    notice.id === "overlap-global-equity-core"
+  ) {
+    return "allocation";
   }
 
-  if (params.hasPortfolio && !params.hasAllocationSetup) {
-    actions.push({
-      id: "action-allocation",
-      title: "Allokation festlegen",
-      body: "Definiere Reihenfolge und Caps, damit neue Beitraege auch wirklich auf ETFs verteilt werden koennen.",
-      href: "/allokation",
-      label: "Allokation einrichten",
-    });
+  if (notice.id === "analysis-missing-price") {
+    return "portfolio";
   }
 
-  if (params.hasPortfolio && !params.hasAssumptions) {
-    actions.push({
-      id: "action-analysis",
-      title: "Annahmen pruefen",
-      body: "Hinterlege realistische Rendite-, TER- und Volatilitaetsannahmen, damit Analyse und Monte Carlo belastbarer werden.",
-      href: "/analyse",
-      label: "Zur Analyse",
-    });
+  if (notice.id.startsWith("goal-")) {
+    return "goal";
   }
 
-  if (!params.hasGoalSettings) {
-    actions.push({
-      id: "action-goals",
-      title: "Ziel definieren",
-      body: "Lege Zielvermoegen, Zieljahr und gewuenschte Wahrscheinlichkeit fest, damit die App deinen Plan bewerten kann.",
-      href: "/ziele",
-      label: "Ziel anlegen",
-    });
+  return null;
+}
+
+function getStepNotices(
+  notices: PlausibilityNotice[],
+  stepKey: DashboardSetupStepKey,
+) {
+  return notices.filter((notice) => mapNoticeToStepKey(notice) === stepKey);
+}
+
+function getStepStatus(params: {
+  isOpen: boolean;
+  notices: PlausibilityNotice[];
+  hasStructuralAttention?: boolean;
+}) {
+  if (params.isOpen) {
+    return "open" as DashboardSetupStepStatus;
   }
 
-  return actions.slice(0, 3);
+  if (
+    params.hasStructuralAttention ||
+    params.notices.some((notice) => notice.category === "data_quality")
+  ) {
+    return "attention" as DashboardSetupStepStatus;
+  }
+
+  return "done" as DashboardSetupStepStatus;
+}
+
+function buildSetupSteps(params: {
+  portfolioOverview: Awaited<ReturnType<typeof getPortfolioOverview>>;
+  contributionRules: Awaited<ReturnType<typeof getContributionRules>>;
+  lumpSums: Awaited<ReturnType<typeof getLumpSumContributions>>;
+  allocationRules: Awaited<ReturnType<typeof getAllocationRules>>;
+  notices: PlausibilityNotice[];
+  goalSettings: Awaited<ReturnType<typeof getGoalSettings>>;
+}) {
+  const {
+    portfolioOverview,
+    contributionRules,
+    lumpSums,
+    allocationRules,
+    notices,
+    goalSettings,
+  } = params;
+  const portfolioNotices = getStepNotices(notices, "portfolio");
+  const contributionNotices = getStepNotices(notices, "contributions");
+  const allocationNotices = getStepNotices(notices, "allocation");
+  const goalNotices = getStepNotices(notices, "goal");
+  const missingStartValueCount = portfolioOverview.holdings.filter(
+    (holding) => holding.quantity <= 0 || holding.costBasisPerShare === null,
+  ).length;
+  const hasContributionPlan =
+    contributionRules.length > 0 || lumpSums.length > 0;
+  const latestContributionRule = [...contributionRules].sort((left, right) =>
+    left.startMonth.localeCompare(right.startMonth),
+  ).at(-1);
+  const configuredActiveRules = allocationRules.filter(
+    (rule) => rule.isActive && (rule.targetPercentage ?? 0) > PERCENTAGE_CONFIGURATION_EPSILON,
+  );
+  const activePercentageTotal = configuredActiveRules.reduce(
+    (sum, rule) => sum + (rule.targetPercentage ?? 0),
+    0,
+  );
+  const hasAllocationSetup = configuredActiveRules.length > 0;
+
+  const portfolioStep: DashboardSetupStep = {
+    key: "portfolio",
+    title: "Portfolio",
+    status: getStepStatus({
+      isOpen: portfolioOverview.holdingCount === 0,
+      notices: portfolioNotices,
+    }),
+    summary:
+      portfolioOverview.holdingCount === 0
+        ? "Noch keine ETFs"
+        : missingStartValueCount > 0
+          ? missingStartValueCount === 1
+            ? "1 ETF ohne Startwert"
+            : `${missingStartValueCount} ETFs ohne Startwert`
+          : portfolioOverview.holdingCount === 1
+            ? "1 ETF erfasst"
+            : `${portfolioOverview.holdingCount} ETFs erfasst`,
+    href: "/portfolio",
+    linkLabel:
+      portfolioOverview.holdingCount === 0
+        ? "Einrichten"
+        : portfolioNotices.some((notice) => notice.category === "data_quality")
+          ? "Prüfen"
+          : "Öffnen",
+    notices: portfolioNotices,
+    hasDataQualityNotice: portfolioNotices.some(
+      (notice) => notice.category === "data_quality",
+    ),
+  };
+
+  const contributionsStep: DashboardSetupStep = {
+    key: "contributions",
+    title: "Einzahlungen",
+    status: getStepStatus({
+      isOpen: !hasContributionPlan,
+      notices: contributionNotices,
+    }),
+    summary:
+      !hasContributionPlan
+        ? "Noch keine Einzahlung"
+        : contributionRules.length === 0
+          ? lumpSums.length === 1
+            ? "1 Sonderzahlung geplant"
+            : `${lumpSums.length} Sonderzahlungen geplant`
+          : `${formatCurrencyWhole(latestContributionRule?.monthlyAmount ?? 0)}/Monat ab ${formatMonthLabel(latestContributionRule?.startMonth ?? "")}`,
+    href: "/einzahlungen",
+    linkLabel:
+      !hasContributionPlan
+        ? "Einrichten"
+        : contributionNotices.some((notice) => notice.category === "data_quality")
+          ? "Prüfen"
+          : "Öffnen",
+    notices: contributionNotices,
+    hasDataQualityNotice: contributionNotices.some(
+      (notice) => notice.category === "data_quality",
+    ),
+  };
+
+  const allocationStep: DashboardSetupStep = {
+    key: "allocation",
+    title: "Allokation",
+    status: getStepStatus({
+      isOpen: !hasAllocationSetup,
+      notices: allocationNotices,
+      hasStructuralAttention:
+        hasAllocationSetup &&
+        Math.abs(activePercentageTotal - 100) > PERCENTAGE_CONFIGURATION_EPSILON,
+    }),
+    summary: !hasAllocationSetup
+      ? "Noch keine Verteilung"
+      : `${formatPercentage(activePercentageTotal)} verteilt`,
+    href: "/allokation",
+    linkLabel:
+      !hasAllocationSetup
+        ? "Einrichten"
+        : allocationNotices.some((notice) => notice.category === "data_quality") ||
+            Math.abs(activePercentageTotal - 100) > PERCENTAGE_CONFIGURATION_EPSILON
+          ? "Prüfen"
+          : "Öffnen",
+    notices: allocationNotices,
+    hasDataQualityNotice:
+      allocationNotices.some((notice) => notice.category === "data_quality") ||
+      (hasAllocationSetup &&
+        Math.abs(activePercentageTotal - 100) > PERCENTAGE_CONFIGURATION_EPSILON),
+  };
+
+  const goalStep: DashboardSetupStep = {
+    key: "goal",
+    title: "Ziel",
+    status: getStepStatus({
+      isOpen: goalSettings === null,
+      notices: goalNotices,
+    }),
+    summary:
+      goalSettings === null
+        ? "Noch kein Ziel"
+        : `${formatCurrencyWhole(goalSettings.targetWealth)} bis ${goalSettings.targetYear}`,
+    href: "/ziele",
+    linkLabel:
+      goalSettings === null
+        ? "Einrichten"
+        : goalNotices.some((notice) => notice.category === "data_quality")
+          ? "Prüfen"
+          : "Öffnen",
+    notices: goalNotices,
+    hasDataQualityNotice: goalNotices.some(
+      (notice) => notice.category === "data_quality",
+    ),
+  };
+
+  return [portfolioStep, contributionsStep, allocationStep, goalStep];
 }
 
 export async function getDashboardOverview(
@@ -131,7 +288,9 @@ export async function getDashboardOverview(
   const nextMonthContribution = contributionTimeline.at(1)?.totalAmount ?? 0;
   const hasContributionPlan =
     contributionRules.length > 0 || lumpSums.length > 0;
-  const hasAllocationSetup = allocationRules.length > 0;
+  const hasAllocationSetup = allocationRules.some(
+    (rule) => rule.isActive && (rule.targetPercentage ?? 0) > PERCENTAGE_CONFIGURATION_EPSILON,
+  );
   const hasAssumptions = assumptions.length > 0;
 
   const projection =
@@ -198,7 +357,7 @@ export async function getDashboardOverview(
           lumpSums,
           allocationRules,
           allocationTimeline,
-        }).slice(0, 4)
+        })
       : assumptions.length > 0
         ? buildAnalysisNotices({
             assumptions,
@@ -206,18 +365,18 @@ export async function getDashboardOverview(
             lumpSums,
             allocationRules,
             allocationTimeline,
-          }).slice(0, 4)
+          })
         : buildContributionNotices({
             rules: contributionRules,
             lumpSums,
-          }).slice(0, 4);
-
-  const nextActions = buildNextActions({
-    hasPortfolio: portfolioOverview.holdingCount > 0,
-    hasContributionPlan,
-    hasAllocationSetup,
-    hasGoalSettings: goalSettings !== null,
-    hasAssumptions,
+          });
+  const setupSteps = buildSetupSteps({
+    portfolioOverview,
+    contributionRules,
+    lumpSums,
+    allocationRules,
+    notices: notices.filter((notice) => notice.category !== "model"),
+    goalSettings,
   });
 
   return {
@@ -228,8 +387,7 @@ export async function getDashboardOverview(
     forecastYears: years,
     typicalEndValue,
     projection,
-    notices,
-    nextActions,
+    setupSteps,
     hasContributionPlan,
     hasAllocationSetup,
     hasAssumptions,

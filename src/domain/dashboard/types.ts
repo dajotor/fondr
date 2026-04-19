@@ -3,12 +3,23 @@ import type { GoalEvaluation, GoalSettings } from "@/domain/goals/types";
 import type { PortfolioOverview } from "@/domain/portfolio/types";
 import type { PlausibilityNotice } from "@/lib/plausibility";
 
-export type DashboardNextAction = {
-  id: string;
+export type DashboardSetupStepKey =
+  | "portfolio"
+  | "contributions"
+  | "allocation"
+  | "goal";
+
+export type DashboardSetupStepStatus = "open" | "attention" | "done";
+
+export type DashboardSetupStep = {
+  key: DashboardSetupStepKey;
   title: string;
-  body: string;
+  status: DashboardSetupStepStatus;
+  summary: string;
   href: string;
-  label: string;
+  linkLabel: "Einrichten" | "Prüfen" | "Öffnen";
+  notices: PlausibilityNotice[];
+  hasDataQualityNotice: boolean;
 };
 
 export type DashboardOverview = {
@@ -19,8 +30,7 @@ export type DashboardOverview = {
   forecastYears: number;
   typicalEndValue: number | null;
   projection: PortfolioProjection | null;
-  notices: PlausibilityNotice[];
-  nextActions: DashboardNextAction[];
+  setupSteps: DashboardSetupStep[];
   hasContributionPlan: boolean;
   hasAllocationSetup: boolean;
   hasAssumptions: boolean;

@@ -2,7 +2,6 @@ import { DashboardMiniTrend } from "@/components/dashboard/dashboard-mini-trend"
 import { DashboardNextActions } from "@/components/dashboard/dashboard-next-actions";
 import { DashboardStatusPanel } from "@/components/dashboard/dashboard-status-panel";
 import { DashboardSummaryCards } from "@/components/dashboard/dashboard-summary-cards";
-import { NoticeList } from "@/components/ui/notice-list";
 import { normalizeAnalysisYears } from "@/features/analysis/lib/horizon";
 import { getDashboardOverview } from "@/features/dashboard/queries/get-dashboard-overview";
 import { requireUser } from "@/lib/auth/guard";
@@ -48,9 +47,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         <DashboardMiniTrend projection={overview.projection} />
       </div>
 
-      <NoticeList title="Einordnung" items={overview.notices} />
-
-      <DashboardNextActions actions={overview.nextActions} />
+      <DashboardNextActions steps={overview.setupSteps} />
     </section>
   );
 }
