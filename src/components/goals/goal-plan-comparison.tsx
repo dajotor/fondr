@@ -7,10 +7,6 @@ type GoalPlanComparisonProps = {
 };
 
 function getMonthlyContributionLabel(comparison: GoalPlanComparison) {
-  if (comparison.key === "current") {
-    return "Bestehende Beitraege";
-  }
-
   return formatCurrencyWhole(comparison.monthlyContribution);
 }
 
@@ -56,10 +52,6 @@ export function GoalPlanComparison({
             ))}
           </tbody>
         </table>
-      </div>
-      <div className="border-t border-border/80 px-5 py-3 text-xs leading-6 text-muted-foreground">
-        Zwei Vergleichsvarianten zeigen, was dein Plan bei anderer
-        Zielsicherheit kosten würde. Sonderzahlungen bleiben unverändert.
       </div>
     </div>
   );
