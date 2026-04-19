@@ -136,9 +136,6 @@ export function DashboardNextActions({ steps }: DashboardNextActionsProps) {
                         >
                           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                             <div className="space-y-1">
-                              <p className="text-sm font-medium text-foreground">
-                                {notice.title}
-                              </p>
                               <p className="text-sm leading-6 text-muted-foreground">
                                 {notice.body}
                               </p>

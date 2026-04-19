@@ -87,6 +87,13 @@ function getStepStatus(params: {
   return "done" as DashboardSetupStepStatus;
 }
 
+function clearNoticesForOpenStep(
+  status: DashboardSetupStepStatus,
+  notices: PlausibilityNotice[],
+) {
+  return status === "open" ? [] : notices;
+}
+
 function buildSetupSteps(params: {
   portfolioOverview: Awaited<ReturnType<typeof getPortfolioOverview>>;
   contributionRules: Awaited<ReturnType<typeof getContributionRules>>;
@@ -124,13 +131,14 @@ function buildSetupSteps(params: {
   );
   const hasAllocationSetup = configuredActiveRules.length > 0;
 
+  const portfolioStatus = getStepStatus({
+    isOpen: portfolioOverview.holdingCount === 0,
+    notices: portfolioNotices,
+  });
   const portfolioStep: DashboardSetupStep = {
     key: "portfolio",
     title: "Portfolio",
-    status: getStepStatus({
-      isOpen: portfolioOverview.holdingCount === 0,
-      notices: portfolioNotices,
-    }),
+    status: portfolioStatus,
     summary:
       portfolioOverview.holdingCount === 0
         ? "Noch keine ETFs"
@@ -148,19 +156,20 @@ function buildSetupSteps(params: {
         : portfolioNotices.some((notice) => notice.category === "data_quality")
           ? "Prüfen"
           : "Öffnen",
-    notices: portfolioNotices,
+    notices: clearNoticesForOpenStep(portfolioStatus, portfolioNotices),
     hasDataQualityNotice: portfolioNotices.some(
       (notice) => notice.category === "data_quality",
     ),
   };
 
+  const contributionsStatus = getStepStatus({
+    isOpen: !hasContributionPlan,
+    notices: contributionNotices,
+  });
   const contributionsStep: DashboardSetupStep = {
     key: "contributions",
     title: "Einzahlungen",
-    status: getStepStatus({
-      isOpen: !hasContributionPlan,
-      notices: contributionNotices,
-    }),
+    status: contributionsStatus,
     summary:
       !hasContributionPlan
         ? "Noch keine Einzahlung"
@@ -176,22 +185,23 @@ function buildSetupSteps(params: {
         : contributionNotices.some((notice) => notice.category === "data_quality")
           ? "Prüfen"
           : "Öffnen",
-    notices: contributionNotices,
+    notices: clearNoticesForOpenStep(contributionsStatus, contributionNotices),
     hasDataQualityNotice: contributionNotices.some(
       (notice) => notice.category === "data_quality",
     ),
   };
 
+  const allocationStatus = getStepStatus({
+    isOpen: !hasAllocationSetup,
+    notices: allocationNotices,
+    hasStructuralAttention:
+      hasAllocationSetup &&
+      Math.abs(activePercentageTotal - 100) > PERCENTAGE_CONFIGURATION_EPSILON,
+  });
   const allocationStep: DashboardSetupStep = {
     key: "allocation",
     title: "Allokation",
-    status: getStepStatus({
-      isOpen: !hasAllocationSetup,
-      notices: allocationNotices,
-      hasStructuralAttention:
-        hasAllocationSetup &&
-        Math.abs(activePercentageTotal - 100) > PERCENTAGE_CONFIGURATION_EPSILON,
-    }),
+    status: allocationStatus,
     summary: !hasAllocationSetup
       ? "Noch keine Verteilung"
       : `${formatPercentage(activePercentageTotal)} verteilt`,
@@ -203,20 +213,21 @@ function buildSetupSteps(params: {
             Math.abs(activePercentageTotal - 100) > PERCENTAGE_CONFIGURATION_EPSILON
           ? "Prüfen"
           : "Öffnen",
-    notices: allocationNotices,
+    notices: clearNoticesForOpenStep(allocationStatus, allocationNotices),
     hasDataQualityNotice:
       allocationNotices.some((notice) => notice.category === "data_quality") ||
       (hasAllocationSetup &&
         Math.abs(activePercentageTotal - 100) > PERCENTAGE_CONFIGURATION_EPSILON),
   };
 
+  const goalStatus = getStepStatus({
+    isOpen: goalSettings === null,
+    notices: goalNotices,
+  });
   const goalStep: DashboardSetupStep = {
     key: "goal",
     title: "Ziel",
-    status: getStepStatus({
-      isOpen: goalSettings === null,
-      notices: goalNotices,
-    }),
+    status: goalStatus,
     summary:
       goalSettings === null
         ? "Noch kein Ziel"
@@ -228,7 +239,7 @@ function buildSetupSteps(params: {
         : goalNotices.some((notice) => notice.category === "data_quality")
           ? "Prüfen"
           : "Öffnen",
-    notices: goalNotices,
+    notices: clearNoticesForOpenStep(goalStatus, goalNotices),
     hasDataQualityNotice: goalNotices.some(
       (notice) => notice.category === "data_quality",
     ),
