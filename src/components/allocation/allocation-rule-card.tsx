@@ -91,13 +91,22 @@ export function AllocationRuleCard({
             <p className="text-xs text-muted-foreground">{etf.isin}</p>
           </div>
 
-          <label className="inline-flex items-center gap-3 rounded-full border border-border bg-card px-3 py-2 text-xs font-medium text-foreground">
-            <input
-              type="checkbox"
-              checked={isActive}
-              onChange={(event) => setIsActive(event.target.checked)}
-              className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-ring/20"
-            />
+          <label className="inline-flex cursor-pointer select-none items-center gap-3 text-sm font-medium text-foreground">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isActive}
+              onClick={() => setIsActive(!isActive)}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                isActive ? "bg-cyan-300/60" : "bg-border/60"
+              }`}
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                  isActive ? "translate-x-[22px]" : "translate-x-0.5"
+                }`}
+              />
+            </button>
             Aktiv besparen
           </label>
         </div>
