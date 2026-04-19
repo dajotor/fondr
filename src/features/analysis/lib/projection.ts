@@ -6,6 +6,8 @@ import type {
 } from "@/domain/analysis/types";
 import type { AllocationTimelineMonth } from "@/domain/allocation/types";
 
+const EPSILON = 0.000001;
+
 function roundCurrency(value: number) {
   return Math.round(value * 100) / 100;
 }
@@ -16,6 +18,24 @@ export function getMonthlyReturnRate(annualReturn: number) {
 
 export function getMonthlyTerRate(annualTer: number) {
   return Math.pow(1 + annualTer, 1 / 12) - 1;
+}
+
+export function getRelevantProjectionAssumptions(
+  assumptions: ProjectionAssumption[],
+  allocationTimeline: AllocationTimelineMonth[],
+) {
+  return assumptions.filter((assumption) => {
+    if (assumption.startingValue > EPSILON) {
+      return true;
+    }
+
+    return allocationTimeline.some((month) =>
+      month.entries.some(
+        (entry) =>
+          entry.etfId === assumption.etfId && entry.amount > EPSILON,
+      ),
+    );
+  });
 }
 
 export function projectEtfPath(params: {
@@ -61,8 +81,12 @@ export function buildProjectionTimeline(
   assumptions: ProjectionAssumption[],
   allocationTimeline: AllocationTimelineMonth[],
 ): ProjectionTimelineMonth[] {
+  const relevantAssumptions = getRelevantProjectionAssumptions(
+    assumptions,
+    allocationTimeline,
+  );
   const pathsByEtf = new Map(
-    assumptions.map((assumption) => [
+    relevantAssumptions.map((assumption) => [
       assumption.etfId,
       projectEtfPath({ assumption, months: allocationTimeline }),
     ]),
@@ -71,7 +95,7 @@ export function buildProjectionTimeline(
   let cashReserveValue = 0;
 
   return allocationTimeline.map((allocationMonth, index) => {
-    const etfs = assumptions.map((assumption) => {
+    const etfs = relevantAssumptions.map((assumption) => {
       const path = pathsByEtf.get(assumption.etfId) ?? [];
       return path[index];
     });

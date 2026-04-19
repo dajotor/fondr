@@ -5,7 +5,11 @@ import type {
   ProjectionAssumption,
 } from "@/domain/analysis/types";
 import type { AllocationTimelineMonth } from "@/domain/allocation/types";
-import { getMonthlyReturnRate, getMonthlyTerRate } from "@/features/analysis/lib/projection";
+import {
+  getMonthlyReturnRate,
+  getMonthlyTerRate,
+  getRelevantProjectionAssumptions,
+} from "@/features/analysis/lib/projection";
 
 const DEFAULT_RUNS = 1000;
 const DEFAULT_BUCKETS = 12;
@@ -47,7 +51,11 @@ function buildSimulationSeed(params: {
   allocationTimeline: AllocationTimelineMonth[];
   runs: number;
 }) {
-  const assumptionPart = [...params.assumptions]
+  const relevantAssumptions = getRelevantProjectionAssumptions(
+    params.assumptions,
+    params.allocationTimeline,
+  );
+  const assumptionPart = [...relevantAssumptions]
     .sort(compareByEtfId)
     .map((assumption) =>
       [
@@ -158,7 +166,10 @@ export function simulatePortfolioPathMonteCarlo(params: {
   const months = allocationTimeline.length;
   const totalPath = new Float64Array(months);
   const cashReservePath = new Float64Array(months);
-  const sortedAssumptions = [...assumptions].sort(compareByEtfId);
+  const sortedAssumptions = getRelevantProjectionAssumptions(
+    assumptions,
+    allocationTimeline,
+  ).sort(compareByEtfId);
 
   for (let monthIndex = 0; monthIndex < months; monthIndex += 1) {
     const priorCash = monthIndex === 0 ? 0 : cashReservePath[monthIndex - 1];

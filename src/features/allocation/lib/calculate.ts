@@ -115,106 +115,95 @@ function buildOverriddenPercentagesByEtf(
 }
 
 function resolvePercentageAllocation(params: {
+  baseContributionAmount: number;
   remainingAmount: number;
   rules: AllocationRuleView[];
   overrides: ManualAllocationOverrideView[];
   cumulativeContributions: Map<string, number>;
   entries: AllocationEntry[];
 }) {
-  const { rules, overrides, cumulativeContributions, entries } = params;
-  let remainingAmount = roundCurrency(params.remainingAmount);
+  const {
+    baseContributionAmount,
+    rules,
+    overrides,
+    cumulativeContributions,
+    entries,
+  } = params;
+  const remainingAmount = roundCurrency(params.remainingAmount);
   const overriddenPercentagesByEtf = buildOverriddenPercentagesByEtf(overrides);
+  const eligibleRules = getEligiblePercentageRules(
+    rules,
+    cumulativeContributions,
+    overriddenPercentagesByEtf,
+  );
 
-  while (remainingAmount > EPSILON) {
-    const eligibleRules = getEligiblePercentageRules(
-      rules,
-      cumulativeContributions,
-      overriddenPercentagesByEtf,
-    );
-
-    if (eligibleRules.length === 0) {
-      upsertEntry(entries, {
-        etfId: null,
-        etfName: "Nicht zugewiesen",
-        amount: remainingAmount,
-        percentage: null,
-        source: "unallocated",
-        resultingCumulativeContribution: null,
-        capReachedAfterAllocation: false,
-      });
-      return 0;
-    }
-
-    const totalPercentage = eligibleRules.reduce(
-      (sum, rule) =>
-        sum +
-        Math.max(
-          (rule.targetPercentage ?? 0) -
-            (overriddenPercentagesByEtf.get(rule.etfId) ?? 0),
-          0,
-        ),
-      0,
-    );
-    let distributedAmount = 0;
-    let plannedDistributedAmount = 0;
-
-    for (const [index, rule] of eligibleRules.entries()) {
-      const overriddenPercentage =
-        overriddenPercentagesByEtf.get(rule.etfId) ?? 0;
-      const remainingTargetPercentage = Math.max(
-        (rule.targetPercentage ?? 0) - overriddenPercentage,
-        0,
-      );
-      const current = cumulativeContributions.get(rule.etfId) ?? 0;
-      const plannedShareAmount =
-        index === eligibleRules.length - 1
-          ? roundCurrency(Math.max(remainingAmount - plannedDistributedAmount, 0))
-          : roundCurrency(
-              (remainingAmount * remainingTargetPercentage) / totalPercentage,
-            );
-      plannedDistributedAmount = roundCurrency(
-        plannedDistributedAmount + plannedShareAmount,
-      );
-      const amountForRule = roundCurrency(plannedShareAmount);
-
-      if (amountForRule <= EPSILON) {
-        continue;
-      }
-
-      const newTotal = roundCurrency(current + amountForRule);
-      cumulativeContributions.set(rule.etfId, newTotal);
-      distributedAmount = roundCurrency(distributedAmount + amountForRule);
-
-      upsertEntry(entries, {
-        etfId: rule.etfId,
-        etfName: rule.etfName,
-        amount: amountForRule,
-        percentage: remainingTargetPercentage,
-        source: "automatic",
-        resultingCumulativeContribution: newTotal,
-        capReachedAfterAllocation: false,
-      });
-    }
-
-    if (distributedAmount <= EPSILON) {
-      upsertEntry(entries, {
-        etfId: null,
-        etfName: "Nicht zugewiesen",
-        amount: remainingAmount,
-        percentage: null,
-        source: "unallocated",
-        resultingCumulativeContribution: null,
-        capReachedAfterAllocation: false,
-      });
-      return 0;
-    }
-
-    remainingAmount = roundCurrency(
-      Math.max(remainingAmount - distributedAmount, 0),
-    );
+  if (eligibleRules.length === 0) {
+    upsertEntry(entries, {
+      etfId: null,
+      etfName: "Nicht zugewiesen",
+      amount: remainingAmount,
+      percentage: null,
+      source: "unallocated",
+      resultingCumulativeContribution: null,
+      capReachedAfterAllocation: false,
+    });
+    return 0;
   }
 
-  return remainingAmount;
+  let distributedAmount = 0;
+
+  for (const rule of eligibleRules) {
+    const overriddenPercentage =
+      overriddenPercentagesByEtf.get(rule.etfId) ?? 0;
+    const remainingTargetPercentage = Math.max(
+      (rule.targetPercentage ?? 0) - overriddenPercentage,
+      0,
+    );
+    const current = cumulativeContributions.get(rule.etfId) ?? 0;
+    const desiredAmount = safePercentageAmount(
+      baseContributionAmount,
+      remainingTargetPercentage,
+    );
+    const amountForRule = roundCurrency(
+      Math.min(desiredAmount, Math.max(remainingAmount - distributedAmount, 0)),
+    );
+
+    if (amountForRule <= EPSILON) {
+      continue;
+    }
+
+    const newTotal = roundCurrency(current + amountForRule);
+    cumulativeContributions.set(rule.etfId, newTotal);
+    distributedAmount = roundCurrency(distributedAmount + amountForRule);
+
+    upsertEntry(entries, {
+      etfId: rule.etfId,
+      etfName: rule.etfName,
+      amount: amountForRule,
+      percentage: remainingTargetPercentage,
+      source: "automatic",
+      resultingCumulativeContribution: newTotal,
+      capReachedAfterAllocation: false,
+    });
+  }
+
+  const leftoverAmount = roundCurrency(
+    Math.max(remainingAmount - distributedAmount, 0),
+  );
+
+  if (leftoverAmount > EPSILON) {
+    upsertEntry(entries, {
+      etfId: null,
+      etfName: "Nicht zugewiesen",
+      amount: leftoverAmount,
+      percentage: null,
+      source: "unallocated",
+      resultingCumulativeContribution: null,
+      capReachedAfterAllocation: false,
+    });
+  }
+
+  return leftoverAmount;
 }
 
 export function resolveAllocationForMonth(
@@ -262,6 +251,7 @@ export function resolveAllocationForMonth(
   );
 
   remainingAmount = resolvePercentageAllocation({
+    baseContributionAmount: totalContribution,
     remainingAmount,
     rules: sortedRules,
     overrides,
