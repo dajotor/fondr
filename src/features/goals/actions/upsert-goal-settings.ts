@@ -50,7 +50,7 @@ export async function upsertGoalSettings(
 
   if (!parsedValues.success) {
     return {
-      error: "Bitte pruefe die markierten Felder.",
+      error: "Bitte prüfe die markierten Felder.",
       fieldErrors: mapFieldErrors(parsedValues.error.issues),
       fieldValues: toGoalSettingsFieldValues(formData),
     };

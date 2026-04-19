@@ -59,9 +59,9 @@ export const holdingFormSchema = z.object({
     },
     z.coerce
       .number({
-        invalid_type_error: "Bitte gib einen gueltigen Kurs ein.",
+        invalid_type_error: "Bitte gib einen gültigen Kurs ein.",
       })
-      .positive("Der manuelle Kurs muss groesser als 0 sein.")
+      .positive("Der manuelle Kurs muss größer als 0 sein.")
       .optional(),
   ),
   notes: z.preprocess(

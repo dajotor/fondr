@@ -49,7 +49,7 @@ export function ManualAllocationOverrideForm({
             className="h-12 w-full rounded-2xl border border-input bg-background px-4 text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
             required
           >
-            <option value="">ETF waehlen</option>
+            <option value="">ETF wählen</option>
             {etfs.map((etf) => (
               <option key={etf.etfId} value={etf.etfId}>
                 {etf.etfName} ({etf.isin})
@@ -99,7 +99,7 @@ export function ManualAllocationOverrideForm({
         disabled={isPending}
         className="inline-flex h-12 items-center justify-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {isPending ? "Wird gespeichert..." : "Override hinzufuegen"}
+        {isPending ? "Wird gespeichert..." : "Override hinzufügen"}
       </button>
     </form>
   );

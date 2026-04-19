@@ -35,7 +35,7 @@ export function AllocationTimelinePreview({
                     : hasMultipleAutomaticEtfs
                       ? " · automatisch auf mehrere ETFs verteilt"
                       : month.unallocatedAmount > 0
-                        ? " · kein aktiver ETF verfuegbar"
+                        ? " · kein aktiver ETF verfügbar"
                         : ""}
                 </p>
               </div>

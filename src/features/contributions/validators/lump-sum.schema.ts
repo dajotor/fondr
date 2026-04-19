@@ -7,13 +7,13 @@ export const lumpSumContributionSchema = z.object({
     .string()
     .regex(
       MONTH_INPUT_REGEX,
-      "Bitte waehle Monat und Jahr, z. B. 2026-04.",
+      "Bitte wähle Monat und Jahr, z. B. 2026-04.",
     ),
   amount: z.coerce
     .number({
-      invalid_type_error: "Bitte gib einen gueltigen Betrag ein.",
+      invalid_type_error: "Bitte gib einen gültigen Betrag ein.",
     })
-    .positive("Der Betrag muss groesser als 0 sein."),
+    .positive("Der Betrag muss größer als 0 sein."),
   note: z.preprocess(
     (value) => {
       if (typeof value !== "string") {

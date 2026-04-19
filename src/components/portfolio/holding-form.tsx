@@ -69,7 +69,7 @@ function LookupHint({ lookupState }: { lookupState: LookupState }) {
   if (lookupState.status === "loading") {
     return (
       <div className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
-        ETF-Daten werden zur ISIN geprueft.
+        ETF-Daten werden zur ISIN geprüft.
       </div>
     );
   }
@@ -189,7 +189,7 @@ export function HoldingForm({
             match: null,
             message:
               payload.error ||
-              "ETF-Daten konnten gerade nicht geladen werden. Manuelle Eingabe bleibt moeglich.",
+              "ETF-Daten konnten gerade nicht geladen werden. Manuelle Eingabe bleibt möglich.",
           });
           return;
         }
@@ -198,7 +198,7 @@ export function HoldingForm({
           setLookupState({
             status: "not_found",
             match: null,
-            message:
+          message:
               "Kein automatischer Treffer gefunden. Du kannst den ETF weiterhin manuell erfassen.",
           });
           return;
@@ -211,7 +211,7 @@ export function HoldingForm({
           match,
           message:
             match.dataSource === "provider"
-              ? "Stammdaten wurden ueber EODHD geladen. Der letzte bekannte Kurs dient nur als Referenz."
+              ? "Stammdaten wurden über EODHD geladen. Der letzte bekannte Kurs dient nur als Referenz."
               : "Stammdaten wurden aus dem Mock-Katalog geladen.",
         });
 
@@ -237,7 +237,7 @@ export function HoldingForm({
           status: "error",
           match: null,
           message:
-            "ETF-Daten konnten gerade nicht geladen werden. Manuelle Eingabe bleibt moeglich.",
+            "ETF-Daten konnten gerade nicht geladen werden. Manuelle Eingabe bleibt möglich.",
         });
       }
     }, 350);

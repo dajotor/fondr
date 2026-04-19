@@ -11,13 +11,13 @@ export const goalSettingsSchema = z.object({
     z
     .number({
       invalid_type_error:
-        "Bitte gib das Zielvermoegen als Euro-Betrag ein, z. B. 250000 oder 250.000,00.",
+        "Bitte gib das Zielvermögen als Euro-Betrag ein, z. B. 250000 oder 250.000,00.",
     })
-    .positive("Das Zielvermoegen muss groesser als 0 sein."),
+    .positive("Das Zielvermögen muss größer als 0 sein."),
   ),
   targetYear: z.coerce
     .number({
-      invalid_type_error: "Bitte gib ein gueltiges Zieljahr ein.",
+      invalid_type_error: "Bitte gib ein gültiges Zieljahr ein.",
     })
     .int("Das Zieljahr muss ganzzahlig sein.")
     .min(currentYear, "Das Zieljahr darf nicht in der Vergangenheit liegen.")
@@ -32,9 +32,9 @@ export const goalSettingsSchema = z.object({
     },
     z.coerce
       .number({
-        invalid_type_error: "Bitte gib eine gueltige Wahrscheinlichkeit ein.",
+        invalid_type_error: "Bitte gib eine gültige Wahrscheinlichkeit ein.",
       })
-      .positive("Die Wahrscheinlichkeit muss groesser als 0 sein.")
+      .positive("Die Wahrscheinlichkeit muss größer als 0 sein.")
       .max(100, "Die Wahrscheinlichkeit darf maximal 100 % sein.")
       .default(DEFAULT_REQUIRED_PROBABILITY_PERCENT),
   ),

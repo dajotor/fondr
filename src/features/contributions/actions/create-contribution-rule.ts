@@ -44,7 +44,7 @@ export async function createContributionRule(
     }
 
     return {
-      error: "Bitte pruefe die markierten Felder.",
+      error: "Bitte prüfe die markierten Felder.",
       fieldErrors,
       fieldValues: toContributionRuleFieldValues(formData),
     };
@@ -60,7 +60,7 @@ export async function createContributionRule(
   if (error) {
     if (error.code === "23505") {
       return {
-        error: "Fuer diesen Startmonat existiert bereits eine Regel.",
+        error: "Für diesen Startmonat existiert bereits eine Regel.",
         fieldErrors: {
           startMonth: "Dieser Monat ist bereits belegt.",
         },

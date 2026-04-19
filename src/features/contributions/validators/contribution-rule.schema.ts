@@ -7,11 +7,11 @@ export const contributionRuleSchema = z.object({
     .string()
     .regex(
       MONTH_INPUT_REGEX,
-      "Bitte waehle Monat und Jahr fuer den Startmonat, z. B. 2026-04.",
+      "Bitte wähle Monat und Jahr für den Startmonat, z. B. 2026-04.",
     ),
   monthlyAmount: z.coerce
     .number({
-      invalid_type_error: "Bitte gib einen gueltigen Monatsbetrag ein.",
+      invalid_type_error: "Bitte gib einen gültigen Monatsbetrag ein.",
     })
     .nonnegative("Der Monatsbetrag darf nicht negativ sein."),
 });

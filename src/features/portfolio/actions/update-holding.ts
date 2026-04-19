@@ -67,7 +67,7 @@ export async function updateHolding(
 
   if (!parsedValues.success) {
     return {
-      error: "Bitte pruefe die markierten Felder.",
+      error: "Bitte prüfe die markierten Felder.",
       fieldErrors: mapHoldingFieldErrors(parsedValues.error.issues),
       fieldValues: toHoldingFieldValues(formData),
     };
@@ -122,7 +122,7 @@ export async function updateHolding(
         error: getCostBasisMigrationMessage(),
         fieldErrors: {
           costBasisPerShare:
-            "Der Einstandskurs kann erst gespeichert werden, wenn die neue Datenbankspalte verfuegbar ist.",
+            "Der Einstandskurs kann erst gespeichert werden, wenn die neue Datenbankspalte verfügbar ist.",
         },
         fieldValues: toHoldingFieldValues(formData),
       };

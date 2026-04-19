@@ -45,7 +45,7 @@ export async function createLumpSumContribution(
     }
 
     return {
-      error: "Bitte pruefe die markierten Felder.",
+      error: "Bitte prüfe die markierten Felder.",
       fieldErrors,
       fieldValues: toLumpSumFieldValues(formData),
     };

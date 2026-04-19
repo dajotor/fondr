@@ -53,7 +53,7 @@ export async function createManualAllocationOverride(
 
   if (!parsedValues.success) {
     return {
-      error: "Bitte pruefe die markierten Felder.",
+      error: "Bitte prüfe die markierten Felder.",
       fieldErrors: mapFieldErrors(parsedValues.error.issues),
       fieldValues: toManualAllocationOverrideFieldValues(formData),
     };
@@ -66,7 +66,7 @@ export async function createManualAllocationOverride(
     return {
       error: "Der ETF ist nicht mehr im Portfolio vorhanden.",
       fieldErrors: {
-        etfId: "Bitte waehle einen gueltigen ETF aus dem Portfolio.",
+        etfId: "Bitte wähle einen gültigen ETF aus dem Portfolio.",
       },
       fieldValues: toManualAllocationOverrideFieldValues(formData),
     };
@@ -97,9 +97,9 @@ export async function createManualAllocationOverride(
   if (totalPercentage > 100.0001) {
     return {
       error:
-        "Die Summe der manuellen Overrides in diesem Monat darf 100 % nicht ueberschreiten.",
+        "Die Summe der manuellen Overrides in diesem Monat darf 100 % nicht überschreiten.",
       fieldErrors: {
-        percentage: "Die Gesamtquote in diesem Monat waere groesser als 100 %.",
+        percentage: "Die Gesamtquote in diesem Monat wäre größer als 100 %.",
       },
       fieldValues: toManualAllocationOverrideFieldValues(formData),
     };
@@ -116,7 +116,7 @@ export async function createManualAllocationOverride(
     if (error.code === "23505") {
       return {
         error:
-          "Fuer diesen ETF und Monat existiert bereits ein manueller Override.",
+          "Für diesen ETF und Monat existiert bereits ein manueller Override.",
         fieldErrors: {
           etfId: "Dieser ETF hat in diesem Monat bereits einen Override.",
         },

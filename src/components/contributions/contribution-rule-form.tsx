@@ -33,7 +33,7 @@ export function ContributionRuleForm() {
             inputMode="numeric"
             pattern="[0-9]{4}-(0[1-9]|1[0-2])"
             placeholder="2026-04"
-            title="Bitte waehle Monat und Jahr, z. B. 2026-04."
+            title="Bitte wähle Monat und Jahr, z. B. 2026-04."
             aria-describedby={
               startMonthErrorId
                 ? `startMonth-hint ${startMonthErrorId}`
@@ -90,7 +90,7 @@ export function ContributionRuleForm() {
         disabled={isPending}
         className="inline-flex h-12 items-center justify-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {isPending ? "Wird gespeichert..." : "Monatliche Regel hinzufuegen"}
+        {isPending ? "Wird gespeichert..." : "Monatliche Regel hinzufügen"}
       </button>
     </form>
   );

@@ -34,5 +34,5 @@ export function isMissingCostBasisColumnError(error: SupabaseLikeError) {
 }
 
 export function getCostBasisMigrationMessage() {
-  return "Der Einstandskurs konnte noch nicht gespeichert werden, weil die lokale Datenbank das neue Feld noch nicht kennt. Bitte fuehre die Migration fuer den Einstandskurs aus und versuche es erneut.";
+  return "Der Einstandskurs konnte noch nicht gespeichert werden, weil die lokale Datenbank das neue Feld noch nicht kennt. Bitte führe die Migration für den Einstandskurs aus und versuche es erneut.";
 }

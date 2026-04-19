@@ -30,7 +30,7 @@ export async function signInWithMagicLink(
 
   if (typeof email !== "string" || email.trim().length === 0) {
     return {
-      error: "Bitte gib eine gueltige E-Mail-Adresse ein.",
+      error: "Bitte gib eine gültige E-Mail-Adresse ein.",
       success: null,
     };
   }

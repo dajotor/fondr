@@ -1,7 +1,7 @@
 export const MONTH_INPUT_REGEX = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 export const MONTH_INPUT_FALLBACK_LABEL =
-  "Waehle Monat und Jahr. Falls dein Browser keine Monatsauswahl zeigt, nutze das Format JJJJ-MM, z. B. 2026-04.";
+  "Wähle Monat und Jahr. Falls dein Browser keine Monatsauswahl zeigt, nutze das Format JJJJ-MM, z. B. 2026-04.";
 
 export function normalizeMonthInput(monthInput: string): string {
   const trimmed = monthInput.trim();
@@ -39,7 +39,7 @@ export function formatMonthLabel(month: string): string {
   const monthNames = [
     "Januar",
     "Februar",
-    "Maerz",
+    "März",
     "April",
     "Mai",
     "Juni",

@@ -20,7 +20,7 @@ export async function GET(request: Request) {
 
   if (!isinRegex.test(isin)) {
     return NextResponse.json(
-      { error: "Bitte gib eine gueltige ISIN ein." },
+      { error: "Bitte gib eine gültige ISIN ein." },
       { status: 400 },
     );
   }

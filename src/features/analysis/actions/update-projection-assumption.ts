@@ -52,7 +52,7 @@ export async function updateProjectionAssumption(
 
   if (!parsedValues.success) {
     return {
-      error: "Bitte pruefe die markierten Felder.",
+      error: "Bitte prüfe die markierten Felder.",
       fieldErrors: mapFieldErrors(parsedValues.error.issues),
       fieldValues: toProjectionAssumptionFieldValues(formData),
     };
@@ -67,7 +67,7 @@ export async function updateProjectionAssumption(
     return {
       error: "Der ETF ist nicht mehr im aktuellen Portfolio vorhanden.",
       fieldErrors: {
-        etfId: "Bitte waehle einen ETF aus dem aktuellen Portfolio.",
+        etfId: "Bitte wähle einen ETF aus dem aktuellen Portfolio.",
       },
       fieldValues: toProjectionAssumptionFieldValues(formData),
     };

@@ -7,6 +7,10 @@ type GoalPlanComparisonProps = {
 };
 
 function getMonthlyContributionLabel(comparison: GoalPlanComparison) {
+  if (comparison.key === "current") {
+    return "Bestehende Beiträge";
+  }
+
   return formatCurrencyWhole(comparison.monthlyContribution);
 }
 

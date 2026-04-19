@@ -24,7 +24,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "FONDR",
-  description: "Deutschsprachige Web-App fuer ETF-basiertes Wealth Planning.",
+  description: "Deutschsprachige Web-App für ETF-basiertes Wealth Planning.",
 };
 
 type RootLayoutProps = {
