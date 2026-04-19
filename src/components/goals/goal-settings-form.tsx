@@ -27,7 +27,7 @@ export function GoalSettingsForm({ goalSettings }: GoalSettingsFormProps) {
       <div className="grid gap-5 md:grid-cols-3">
         <div className="space-y-2">
           <label htmlFor="target-wealth" className="text-sm font-medium text-foreground/90">
-            Zielvermoegen in EUR
+            Zielvermögen in EUR
           </label>
           <input
             id="target-wealth"

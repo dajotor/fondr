@@ -91,7 +91,7 @@ export function AssumptionFormCard({ assumption }: AssumptionFormCardProps) {
               </p>
             ) : (
               <p className="text-xs text-muted-foreground">
-                Fuer breite ETFs sind niedrige Werte meist realistischer.
+                Für breite ETFs sind niedrige Werte meist realistischer.
               </p>
             )}
           </div>

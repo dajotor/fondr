@@ -23,7 +23,7 @@ export function EndValueDistribution({
             <span className="text-foreground">
               {formatCurrency(bucket.min)} bis {formatCurrency(bucket.max)}
             </span>
-            <span className="text-muted-foreground">{bucket.count} Laeufe</span>
+            <span className="text-muted-foreground">{bucket.count} Läufe</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-secondary">
             <div
