@@ -85,7 +85,7 @@ export function AllocationRuleCard({
       <input type="hidden" name="isActive" value={isActive ? "true" : "false"} />
 
       <div className="space-y-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">{etf.etfName}</p>
             <p className="text-xs text-muted-foreground">{etf.isin}</p>

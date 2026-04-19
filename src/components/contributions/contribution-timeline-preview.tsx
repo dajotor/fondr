@@ -11,7 +11,7 @@ export function ContributionTimelinePreview({
 }: ContributionTimelinePreviewProps) {
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 md:hidden">
+      <div className="grid gap-3 lg:hidden">
         {timeline.map((entry) => (
           <div
             key={entry.month}
@@ -50,7 +50,7 @@ export function ContributionTimelinePreview({
         ))}
       </div>
 
-      <div className="hidden overflow-hidden rounded-[calc(var(--radius)+2px)] border border-border bg-background/80 md:block">
+      <div className="hidden overflow-hidden rounded-[calc(var(--radius)+2px)] border border-border bg-background/80 lg:block">
         <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-border text-left">
           <thead className="bg-secondary/50">

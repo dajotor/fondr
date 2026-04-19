@@ -38,7 +38,7 @@ export function DeleteHoldingDialog({
               </p>
             </div>
 
-            <div className="mt-6 flex flex-col gap-3 md:flex-row">
+            <div className="mt-6 flex flex-col gap-3 lg:flex-row">
               <form action={deleteHolding} className="flex-1">
                 <input type="hidden" name="holdingId" value={holdingId} />
                 <button

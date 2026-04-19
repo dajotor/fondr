@@ -45,7 +45,7 @@ export function NoticeList({ title, items }: NoticeListProps) {
             key={item.id}
             className="rounded-[22px] border border-orange-400/20 bg-orange-500/6 px-4 py-3"
           >
-            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-foreground">
                   {item.title}

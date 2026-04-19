@@ -50,7 +50,7 @@ export function MobileBottomNav() {
 
   return (
     <>
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-[#070909]/96 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.02),0_-12px_28px_rgba(0,0,0,0.26)] backdrop-blur-sm md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-[#070909]/96 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.02),0_-12px_28px_rgba(0,0,0,0.26)] backdrop-blur-sm lg:hidden">
         <nav className="grid grid-cols-5">
           {PRIMARY_NAV_ITEMS.map((item) => {
             const isActive =

@@ -97,7 +97,7 @@ export function DashboardNextActions({ steps }: DashboardNextActionsProps) {
                 key={step.key}
                 className={`rounded-[22px] border px-4 py-4 ${statusClasses.row}`}
               >
-                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0 space-y-1">
                     <div className="flex items-center gap-3">
                       <span
@@ -134,7 +134,7 @@ export function DashboardNextActions({ steps }: DashboardNextActionsProps) {
                           key={notice.id}
                           className="rounded-2xl bg-orange-500/8 px-3 py-2"
                         >
-                          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                          <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                             <div className="space-y-1">
                               <p className="text-sm leading-6 text-muted-foreground">
                                 {notice.body}

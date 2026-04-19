@@ -15,13 +15,13 @@ export default async function PortfolioPage() {
       <div className="app-card relative overflow-hidden">
         <div className="pointer-events-none absolute -right-16 top-0 h-44 w-44 rounded-full bg-fuchsia-500/18 blur-3xl" />
         <div className="pointer-events-none absolute left-0 top-10 h-36 w-36 rounded-full bg-orange-500/14 blur-3xl" />
-        <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-4">
             <span className="app-eyebrow">
               Portfolio
             </span>
             <div className="space-y-4">
-              <h2 className="max-w-5xl text-[2rem] leading-[1.1] font-semibold tracking-[-0.055em] text-foreground sm:text-5xl md:text-6xl">
+              <h2 className="max-w-5xl text-[2rem] leading-[1.1] font-semibold tracking-[-0.055em] text-foreground md:text-5xl lg:text-6xl">
                 Dein Portfolio im Überblick
               </h2>
               <p className="max-w-3xl text-[15px] leading-8 text-slate-300">

@@ -21,7 +21,7 @@ export function LumpSumList({ contributions }: LumpSumListProps) {
       {contributions.map((contribution) => (
         <div
           key={contribution.id}
-          className="flex flex-col gap-4 rounded-[calc(var(--radius)+2px)] border border-border bg-background/80 p-4 md:flex-row md:items-center md:justify-between"
+          className="flex flex-col gap-4 rounded-[calc(var(--radius)+2px)] border border-border bg-background/80 p-4 lg:flex-row lg:items-center lg:justify-between"
         >
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">

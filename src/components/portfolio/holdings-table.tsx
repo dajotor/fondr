@@ -27,7 +27,7 @@ function getHoldingSourceLabel(dataSource: PortfolioHoldingView["dataSource"]) {
 export function HoldingsTable({ holdings }: HoldingsTableProps) {
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 md:hidden">
+      <div className="grid gap-3 lg:hidden">
         {holdings.map((holding) => (
           <div
             key={holding.id}
@@ -103,7 +103,7 @@ export function HoldingsTable({ holdings }: HoldingsTableProps) {
         ))}
       </div>
 
-      <div className="app-table-shell hidden md:block">
+      <div className="app-table-shell hidden lg:block">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-border text-left">
             <thead className="bg-secondary/80">

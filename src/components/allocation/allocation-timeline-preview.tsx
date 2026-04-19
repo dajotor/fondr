@@ -23,7 +23,7 @@ export function AllocationTimelinePreview({
             key={month.month}
             className="rounded-[calc(var(--radius)+2px)] border border-border bg-background/80 p-4"
           >
-            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-foreground">
                   {formatMonthLabel(month.month)}

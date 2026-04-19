@@ -399,7 +399,7 @@ export function HoldingForm({
         <p className="text-xs text-muted-foreground">{lookupState.message}</p>
       ) : null}
 
-      <div className="flex flex-col gap-3 pt-2 md:flex-row">
+      <div className="flex flex-col gap-3 pt-2 lg:flex-row">
         <button
           type="submit"
           disabled={isPending}

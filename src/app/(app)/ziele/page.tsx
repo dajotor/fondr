@@ -73,7 +73,7 @@ export default async function GoalsPage() {
               Ziele
             </span>
             <div className="space-y-4">
-              <h2 className="max-w-5xl text-[2rem] leading-[1.1] font-semibold tracking-[-0.055em] text-foreground sm:text-5xl md:text-6xl">
+              <h2 className="max-w-5xl text-[2rem] leading-[1.1] font-semibold tracking-[-0.055em] text-foreground md:text-5xl lg:text-6xl">
                 Ziele planen, sobald deine Grundlage steht
               </h2>
               <p className="max-w-3xl text-[15px] leading-8 text-slate-300">
@@ -150,7 +150,7 @@ export default async function GoalsPage() {
             Ziele
           </span>
           <div className="space-y-4">
-            <h2 className="max-w-5xl text-[2rem] leading-[1.1] font-semibold tracking-[-0.055em] text-foreground sm:text-5xl md:text-6xl">
+            <h2 className="max-w-5xl text-[2rem] leading-[1.1] font-semibold tracking-[-0.055em] text-foreground md:text-5xl lg:text-6xl">
               Prüfe, ob dein heutiger Plan zu deinem Ziel passt
             </h2>
             <p className="max-w-3xl text-[15px] leading-8 text-slate-300">

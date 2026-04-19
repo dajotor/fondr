@@ -19,7 +19,7 @@ export function GoalPlanComparison({
 }: GoalPlanComparisonProps) {
   return (
     <>
-      <div className="grid gap-3 md:hidden">
+      <div className="grid gap-3 lg:hidden">
         {comparisons.map((comparison) => (
           <div
             key={comparison.key}
@@ -57,7 +57,7 @@ export function GoalPlanComparison({
         ))}
       </div>
 
-      <div className="hidden overflow-hidden rounded-[calc(var(--radius)+2px)] border border-border bg-background/80 md:block">
+      <div className="hidden overflow-hidden rounded-[calc(var(--radius)+2px)] border border-border bg-background/80 lg:block">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-border text-left">
             <thead className="bg-secondary/50">
