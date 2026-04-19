@@ -15,7 +15,7 @@ export default async function AppLayout({ children }: AppLayoutProps) {
   await getOrCreatePrimaryPortfolio(user.id);
 
   return (
-    <div className="app-shell">
+    <div className="app-shell pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       <div className="app-surface">
         <div className="app-panel flex min-h-[calc(100vh-2rem)] flex-col overflow-hidden">
           <header className="relative flex flex-col gap-5 border-b app-divider px-5 py-5 md:px-8 md:py-6 xl:flex-row xl:items-start xl:justify-between">
