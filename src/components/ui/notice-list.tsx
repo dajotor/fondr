@@ -59,9 +59,10 @@ export function NoticeList({ title, items }: NoticeListProps) {
               {item.action ? (
                 <Link
                   href={item.action.href}
-                  className="inline-flex h-9 items-center justify-center rounded-full border border-border bg-background px-3 text-xs font-medium text-foreground transition hover:bg-secondary"
+                  className="inline-flex min-h-9 items-center gap-1 py-1 text-sm font-medium text-orange-200 transition hover:text-orange-100 hover:underline"
                 >
                   {item.action.label}
+                  <span aria-hidden="true">→</span>
                 </Link>
               ) : null}
             </div>

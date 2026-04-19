@@ -118,7 +118,7 @@ export function buildEtfOverlapNotices(
 
     notices.push({
       id: "overlap-global-equity-core",
-      title: `Mögliche Überlappung zwischen ${formatCountLabel(globalCore.length, "2 ETFs", `${globalCore.length} ETFs`)}`,
+      title: `Mögliche Überlappung zwischen ${globalCore.length} ETFs`,
       body:
         shortNames.length > 0
           ? `${shortNames.join(", ")} decken ähnliche globale Aktienmärkte ab. Die tatsächliche Streuung kann geringer sein als gedacht.`
