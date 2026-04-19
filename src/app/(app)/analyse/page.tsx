@@ -132,8 +132,14 @@ export default async function AnalysisPage({ searchParams }: AnalysisPageProps) 
             <MonteCarloSummary simulation={monteCarloSimulation} />
 
             <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.85fr)]">
-              <div className="app-card-muted">
-                <MonteCarloBandChart simulation={monteCarloSimulation} />
+              <div className="space-y-3">
+                <div className="app-card-muted">
+                  <MonteCarloBandChart simulation={monteCarloSimulation} />
+                </div>
+                <p className="text-xs leading-6 text-muted-foreground">
+                  Vereinfachtes Modell: ohne Steuern, Inflation, Rebalancing und
+                  Entnahme. Monte-Carlo zeigt Bandbreiten, keine Garantie.
+                </p>
               </div>
 
               <div className="app-card-muted">

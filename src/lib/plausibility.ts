@@ -11,11 +11,17 @@ import type {
   GoalSettings,
 } from "@/domain/goals/types";
 import { getCurrentMonthStart, toMonthKey } from "@/features/contributions/lib/months";
+import { formatCurrencyWhole } from "@/lib/formatting/currency";
 
 export type PlausibilityNotice = {
   id: string;
   title: string;
   body: string;
+  category: "data_quality" | "plausibility" | "model";
+  action?: {
+    label: string;
+    href: string;
+  };
   tone?: "info" | "warning";
 };
 
@@ -55,6 +61,35 @@ function getOverlapBucket(name: string) {
   return null;
 }
 
+function formatCountLabel(count: number, singular: string, plural: string) {
+  return count === 1 ? singular : `${count} ${plural}`;
+}
+
+function shortenEtfName(name: string) {
+  const normalized = normalizeEtfName(name);
+
+  if (normalized.includes("MSCI ACWI")) {
+    return "MSCI ACWI";
+  }
+
+  if (normalized.includes("MSCI WORLD")) {
+    return "MSCI World";
+  }
+
+  if (normalized.includes("FTSE ALL-WORLD") || normalized.includes("FTSE ALL WORLD")) {
+    return "FTSE All-World";
+  }
+
+  if (normalized.includes("S&P 500") || normalized.includes("SP 500")) {
+    return "S&P 500";
+  }
+
+  return name
+    .replace(/\b(ISHARES|XTRACKERS|VANGUARD|AMUNDI|INVESCO|LYXOR|SPDR|UBS)\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function buildEtfOverlapNotices(
   etfNames: string[],
 ): PlausibilityNotice[] {
@@ -76,10 +111,23 @@ export function buildEtfOverlapNotices(
   const globalCore = buckets.get("global-equity-core") ?? [];
 
   if (globalCore.length >= 2) {
+    const shortNames = globalCore
+      .slice(0, 3)
+      .map(shortenEtfName)
+      .filter((name) => name.length > 0);
+
     notices.push({
       id: "overlap-global-equity-core",
-      title: "Moegliche ETF-Ueberlappung",
-      body: `${globalCore.slice(0, 3).join(", ")} bilden wahrscheinlich aehnliche globale Aktienmaerkte ab. Das kann okay sein, fuehrt aber oft zu mehr Ueberschneidung als erwartet.`,
+      title: `Mögliche Überlappung zwischen ${formatCountLabel(globalCore.length, "2 ETFs", `${globalCore.length} ETFs`)}`,
+      body:
+        shortNames.length > 0
+          ? `${shortNames.join(", ")} decken ähnliche globale Aktienmärkte ab. Die tatsächliche Streuung kann geringer sein als gedacht.`
+          : "Mehrere ETFs decken ähnliche globale Aktienmärkte ab. Die tatsächliche Streuung kann geringer sein als gedacht.",
+      category: "plausibility",
+      action: {
+        label: "Allokation prüfen",
+        href: "/allokation",
+      },
       tone: "warning",
     });
   }
@@ -97,15 +145,25 @@ export function buildContributionNotices(params: {
   if (rules.length === 0 && lumpSums.length === 0) {
     notices.push({
       id: "contributions-empty",
-      title: "Noch keine zukuenftigen Einzahlungen geplant",
-      body: "Ohne monatliche Regeln oder Sonderzahlungen bleibt die Vorschau bis auf Weiteres bei 0 EUR pro Monat.",
+      title: "Noch keine Einzahlungen geplant",
+      body: "Ohne Monatsbeitrag oder Sonderzahlung bleibt deine Planung vorerst stehen.",
+      category: "data_quality",
+      action: {
+        label: "Einzahlungen einrichten",
+        href: "/einzahlungen",
+      },
       tone: "warning",
     });
   } else if (rules.length === 0) {
     notices.push({
       id: "contributions-no-recurring",
       title: "Keine laufende Monatsrate",
-      body: "Aktuell beruecksichtigt die Planung nur Sonderzahlungen. Wenn du regelmaessig investieren willst, lege eine monatliche Regel an.",
+      body: "Bisher fließen nur Sonderzahlungen ein. Für einen regelmäßigen Plan fehlt noch ein Monatsbeitrag.",
+      category: "data_quality",
+      action: {
+        label: "Einzahlungen einrichten",
+        href: "/einzahlungen",
+      },
       tone: "info",
     });
   }
@@ -132,8 +190,13 @@ export function buildAllocationNotices(params: {
   if (rules.length === 0) {
     notices.push({
       id: "allocation-no-rules",
-      title: "Noch keine Allokationsregeln aktiv",
-      body: "Ohne aktive ETFs und Zielquoten können neue Beiträge noch nicht automatisch verteilt werden.",
+      title: "Allokation noch unvollständig",
+      body: "Neue Einzahlungen können noch nicht automatisch auf ETFs verteilt werden.",
+      category: "data_quality",
+      action: {
+        label: "Allokation prüfen",
+        href: "/allokation",
+      },
       tone: "warning",
     });
   }
@@ -145,8 +208,13 @@ export function buildAllocationNotices(params: {
   if (monthsWithUnallocated.length > 0) {
     notices.push({
       id: "allocation-unallocated",
-      title: "Ein Teil der Beitraege bleibt uninvestiert",
-      body: "In der Vorschau gibt es Monate mit unverplantem Rest. Typische Ursachen sind fehlende aktive Zielquoten oder eine Summe unter 100 %.",
+      title: "Ein Teil bleibt unverplant",
+      body: "In deiner Verteilung bleibt ein Rest ohne Zuordnung. Meist fehlen aktive Zielquoten oder die Summe liegt unter 100 %.",
+      category: "data_quality",
+      action: {
+        label: "Allokation prüfen",
+        href: "/allokation",
+      },
       tone: "warning",
     });
   }
@@ -176,8 +244,9 @@ export function buildAnalysisNotices(params: {
     ...buildEtfOverlapNotices(assumptions.map((assumption) => assumption.etfName)),
     {
       id: "analysis-methodology",
-      title: "Wichtiger Modellhinweis",
-      body: "Die Analyse beruecksichtigt aktuell keine Steuern, keine Inflation, kein Rebalancing und keine Entnahmephase. Monte Carlo zeigt Bandbreiten, keine Garantie.",
+      title: "Vereinfachtes Modell",
+      body: "Ohne Steuern, Inflation, Rebalancing und Entnahme. Monte-Carlo zeigt Bandbreiten, keine Garantie.",
+      category: "model",
       tone: "info",
     },
   ];
@@ -185,8 +254,13 @@ export function buildAnalysisNotices(params: {
   if (allocationRules.length === 0) {
     notices.push({
       id: "analysis-no-allocation",
-      title: "Neue Beitraege koennen noch nicht investiert werden",
-      body: "Solange keine Allokationsregeln hinterlegt sind, bleiben zukuenftige Einzahlungen in der Analyse als nicht investierter Anteil sichtbar.",
+      title: "Neue Beiträge ohne Zuordnung",
+      body: "Für künftige Einzahlungen fehlt noch eine Verteilung auf ETFs.",
+      category: "data_quality",
+      action: {
+        label: "Allokation prüfen",
+        href: "/allokation",
+      },
       tone: "warning",
     });
   }
@@ -194,17 +268,34 @@ export function buildAnalysisNotices(params: {
   if (allocationTimeline.some((month) => month.unallocatedAmount > 0)) {
     notices.push({
       id: "analysis-unallocated",
-      title: "Nicht zugewiesene Beitraege vorhanden",
-      body: "Ein Teil der geplanten Einzahlungen findet aktuell keinen aktiven ETF. Das drueckt die Aussagekraft der Projektion fuer investiertes Vermoegen.",
+      title: "Ein Teil bleibt unverplant",
+      body: "Ein Teil deiner geplanten Einzahlungen fließt aktuell in keinen ETF. Dadurch bleibt mehr Geld als Reserve liegen.",
+      category: "data_quality",
+      action: {
+        label: "Allokation prüfen",
+        href: "/allokation",
+      },
       tone: "warning",
     });
   }
 
-  if (assumptions.some((assumption) => assumption.startingValue <= 0)) {
+  const missingStartingValueCount = assumptions.filter(
+    (assumption) => assumption.startingValue <= 0,
+  ).length;
+
+  if (missingStartingValueCount > 0) {
     notices.push({
       id: "analysis-missing-price",
-      title: "Einige Startwerte sind unvollstaendig",
-      body: "Mindestens ein ETF startet mit 0 EUR, weil Stueckzahl oder Preisbasis fehlen. Pruefe Portfolio und manuelle Kurse fuer eine belastbarere Analyse.",
+      title:
+        missingStartingValueCount === 1
+          ? "Ein ETF ohne Startwert"
+          : `${missingStartingValueCount} ETFs ohne Startwert`,
+      body: "Bei mindestens einem ETF fehlt Stückzahl oder Einstandskurs. So lange bleibt der Startwert 0 € und die Prognose ist weniger aussagekräftig.",
+      category: "data_quality",
+      action: {
+        label: "Im Portfolio ergänzen",
+        href: "/portfolio",
+      },
       tone: "warning",
     });
   }
@@ -212,8 +303,13 @@ export function buildAnalysisNotices(params: {
   if (assumptions.some((assumption) => assumption.expectedReturnAnnual > 0.1)) {
     notices.push({
       id: "analysis-high-return",
-      title: "Renditeannahmen eher offensiv",
-      body: "Mindestens eine erwartete Rendite liegt ueber 10 % pro Jahr. Solche Werte sind moeglich, aber fuer langfristige Planung oft optimistisch.",
+      title: "Rendite eher optimistisch",
+      body: "Mindestens eine Renditeannahme liegt über 10 % pro Jahr. Das ist möglich, für lange Zeiträume aber oft sehr ambitioniert.",
+      category: "plausibility",
+      action: {
+        label: "Annahmen prüfen",
+        href: "/analyse",
+      },
       tone: "warning",
     });
   }
@@ -221,8 +317,13 @@ export function buildAnalysisNotices(params: {
   if (assumptions.some((assumption) => assumption.terBps > 100)) {
     notices.push({
       id: "analysis-high-ter",
-      title: "TER-Annahmen eher hoch",
-      body: "Mindestens ein ETF liegt ueber 1,00 % TER. Das ist nicht unmoeglich, sollte fuer ein ETF-Portfolio aber bewusst geprueft werden.",
+      title: "Kostenannahmen eher hoch",
+      body: "Mindestens ein ETF liegt über 1,00 % laufenden Kosten pro Jahr. Prüfe, ob dieser Wert zu deinem ETF passt.",
+      category: "plausibility",
+      action: {
+        label: "Annahmen prüfen",
+        href: "/analyse",
+      },
       tone: "warning",
     });
   }
@@ -236,8 +337,13 @@ export function buildAnalysisNotices(params: {
   ) {
     notices.push({
       id: "analysis-high-volatility",
-      title: "Volatilitaetsannahmen eher hoch",
-      body: "Mindestens ein ETF liegt ueber 35 % erwarteter Volatilitaet pro Jahr. Das sorgt in Monte Carlo fuer sehr breite Bandbreiten.",
+      title: "Schwankungen eher hoch",
+      body: "Mindestens eine Schwankungsannahme ist sehr hoch. Dadurch wird die Bandbreite der möglichen Ergebnisse deutlich größer.",
+      category: "plausibility",
+      action: {
+        label: "Annahmen prüfen",
+        href: "/analyse",
+      },
       tone: "warning",
     });
   }
@@ -278,8 +384,13 @@ export function buildGoalNotices(params: {
   if (goalSettings.requiredProbability >= 0.85) {
     notices.push({
       id: "goal-high-probability",
-      title: "Sehr hoher Zielkorridor",
-      body: "Eine gewuenschte Erfolgswahrscheinlichkeit von 85 % oder mehr ist moeglich, fuehrt aber oft zu deutlich hoeheren noetigen Monatsraten.",
+      title: "Sehr hoher Sicherheitswunsch",
+      body: "Eine gewünschte Zielwahrscheinlichkeit ab 85 % erhöht oft den nötigen Monatsbeitrag deutlich.",
+      category: "plausibility",
+      action: {
+        label: "Ziel anpassen",
+        href: "/ziele",
+      },
       tone: "info",
     });
   }
@@ -287,8 +398,13 @@ export function buildGoalNotices(params: {
   if (yearsUntilTarget <= 7 && goalSettings.targetWealth >= 1000000) {
     notices.push({
       id: "goal-short-horizon",
-      title: "Kurzer Horizont fuer ein hohes Ziel",
-      body: "Ein grosses Ziel in wenigen Jahren ist oft besonders anspruchsvoll. Nutze das Ergebnis eher als Groessenordnung als als exakte Zusage.",
+      title: "Kurzer Horizont für hohes Ziel",
+      body: `Für ${formatCurrencyWhole(goalSettings.targetWealth)} in ${yearsUntilTarget} Jahren ist die Bandbreite weit. Höhere Monatsrate oder späteres Zieljahr machen den Plan belastbarer.`,
+      category: "plausibility",
+      action: {
+        label: "Ziel anpassen",
+        href: "/ziele",
+      },
       tone: "warning",
     });
   }
@@ -296,15 +412,25 @@ export function buildGoalNotices(params: {
   if (!optimizationResult.isReachableWithinSearchRange) {
     notices.push({
       id: "goal-unreachable",
-      title: "Ziel im MVP aktuell kaum erreichbar",
-      body: "Innerhalb unseres Suchrahmens bleibt das Ziel selbst mit sehr hoher konstanter Monatsrate ausser Reichweite. Ein spaeteres Zieljahr oder ein niedrigeres Ziel kann sinnvoller sein.",
+      title: "Ziel derzeit sehr anspruchsvoll",
+      body: "Selbst mit einer deutlich höheren Monatsrate bleibt dein Ziel im aktuellen Rahmen schwer erreichbar. Ein späteres Zieljahr oder ein niedrigeres Ziel kann den Plan robuster machen.",
+      category: "plausibility",
+      action: {
+        label: "Ziel anpassen",
+        href: "/ziele",
+      },
       tone: "warning",
     });
   } else if (evaluation.successProbability < 0.25) {
     notices.push({
       id: "goal-ambitious",
-      title: "Mit dem aktuellen Plan eher ambitioniert",
-      body: "Die Monte-Carlo-Laeufe zeigen derzeit nur eine geringe Zielerreichung. Pruefe Zielhoehe, Zieljahr oder kuenftige Monatsrate.",
+      title: "Aktueller Plan eher ambitioniert",
+      body: "Mit deinem heutigen Plan bleibt die Zielerreichung eher niedrig. Prüfe Zielhöhe, Zieljahr oder künftige Monatsrate.",
+      category: "plausibility",
+      action: {
+        label: "Ziel anpassen",
+        href: "/ziele",
+      },
       tone: "warning",
     });
   }
@@ -312,8 +438,13 @@ export function buildGoalNotices(params: {
   if (evaluation.isTargetOutsideSimulationHorizon) {
     notices.push({
       id: "goal-horizon-adjusted",
-      title: "Zielmonat wurde an den verfuegbaren Horizont angepasst",
-      body: "Die Auswertung musste auf den letzten verfuegbaren Simulationsmonat begrenzt werden. Bitte pruefe Zieljahr und Analysehorizont.",
+      title: "Zieljahr liegt außerhalb des Blicks",
+      body: "Für dein Zieljahr reicht der aktuelle Analysezeitraum nicht aus. Bitte prüfe Zieljahr und Analysehorizont.",
+      category: "data_quality",
+      action: {
+        label: "Ziel anpassen",
+        href: "/ziele",
+      },
       tone: "warning",
     });
   }

@@ -182,6 +182,10 @@ export default async function GoalsPage() {
         goalSettings={goalSettings}
         evaluation={currentEvaluation}
       />
+      <p className="text-xs leading-6 text-muted-foreground">
+        Vereinfachtes Modell: ohne Steuern, Inflation, Rebalancing und
+        Entnahme. Monte-Carlo zeigt Bandbreiten, keine Garantie.
+      </p>
 
       <div className="app-card">
         <div className="space-y-2">
