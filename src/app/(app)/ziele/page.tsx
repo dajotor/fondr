@@ -23,6 +23,7 @@ import { buildContributionTimelinePreview } from "@/features/contributions/lib/t
 import { buildAllocationTimelinePreview } from "@/features/allocation/lib/calculate";
 import { runMonteCarloSimulation } from "@/features/analysis/lib/monte-carlo";
 import { buildGoalNotices } from "@/lib/plausibility";
+import { DEFAULT_REQUIRED_PROBABILITY_PERCENT } from "@/features/goals/validators/goal-settings.schema";
 
 function buildDefaultGoalSettings(userId: string): GoalSettings {
   const currentYear = new Date().getUTCFullYear();
@@ -32,7 +33,7 @@ function buildDefaultGoalSettings(userId: string): GoalSettings {
     userId,
     targetWealth: 2000000,
     targetYear: currentYear + 15,
-    requiredProbability: 0.7,
+    requiredProbability: DEFAULT_REQUIRED_PROBABILITY_PERCENT / 100,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

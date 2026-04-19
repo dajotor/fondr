@@ -68,7 +68,7 @@ export function ContributionRuleForm() {
             step="0.01"
             defaultValue={state.fieldValues.monthlyAmount}
             className="h-12 w-full rounded-2xl border border-input bg-background px-4 text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-            placeholder="5000"
+            placeholder="z. B. 500"
             required
           />
           {state.fieldErrors.monthlyAmount ? (

@@ -116,9 +116,26 @@ export default async function AnalysisPage({ searchParams }: AnalysisPageProps) 
 
           <div className="app-card">
             <div className="mb-6 space-y-2">
-              <h3 className="text-xl font-semibold tracking-tight text-foreground">
-                Mögliche Entwicklung mit Schwankungen
-              </h3>
+              <div className="flex flex-wrap items-center gap-3">
+                <h3 className="text-xl font-semibold tracking-tight text-foreground">
+                  Mögliche Entwicklung mit Schwankungen
+                </h3>
+                <details className="group text-sm text-muted-foreground">
+                  <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-full px-1 py-1 transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30">
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-border text-[11px] font-medium">
+                      i
+                    </span>
+                    <span>Hinweis zu Endwert und P50</span>
+                  </summary>
+                  <p className="mt-2 max-w-2xl leading-6 text-muted-foreground">
+                    Endwert und P50 zeigen zwei verschiedene Perspektiven: Der
+                    Endwert zeigt die Entwicklung bei durchschnittlicher Rendite.
+                    P50 ist der Median aller simulierten Verläufe. Die Hälfte
+                    endet darüber, die andere darunter. Bei hoher
+                    Schwankungsbreite liegen beide Werte weiter auseinander.
+                  </p>
+                </details>
+              </div>
               <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
                 Wir rechnen 1.000 mögliche Verläufe mit denselben Einzahlungen
                 und derselben Verteilung durch. So bekommst du ein Gefühl dafür,

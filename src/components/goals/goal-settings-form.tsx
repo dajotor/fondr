@@ -8,6 +8,7 @@ import {
 } from "@/features/goals/actions/form-state";
 import { formatTargetWealthInput } from "@/features/goals/lib/target-wealth-input";
 import { upsertGoalSettings } from "@/features/goals/actions/upsert-goal-settings";
+import { DEFAULT_REQUIRED_PROBABILITY_PERCENT } from "@/features/goals/validators/goal-settings.schema";
 import { formatCurrencyWhole } from "@/lib/formatting/currency";
 import { formatPercentFromRate } from "@/lib/formatting/number";
 
@@ -74,7 +75,7 @@ export function GoalSettingsForm({ goalSettings }: GoalSettingsFormProps) {
             htmlFor="required-probability"
             className="text-sm font-medium text-foreground/90"
           >
-            Gewuenschte Wahrscheinlichkeit in %
+            Wie sicher soll dein Ziel erreicht werden? (in %)
           </label>
           <input
             id="required-probability"
@@ -87,17 +88,24 @@ export function GoalSettingsForm({ goalSettings }: GoalSettingsFormProps) {
               state.fieldValues.requiredProbabilityPercent ||
               (goalSettings.requiredProbability * 100).toFixed(0)
             }
+            placeholder={String(DEFAULT_REQUIRED_PROBABILITY_PERCENT)}
             className="h-12 w-full rounded-2xl border border-input bg-background px-4 text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-            required
           />
           {state.fieldErrors.requiredProbabilityPercent ? (
             <p className="text-xs text-destructive">
               {state.fieldErrors.requiredProbabilityPercent}
             </p>
           ) : (
-            <p className="text-xs text-muted-foreground">
-              Aktuell {formatPercentFromRate(goalSettings.requiredProbability)}
-            </p>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">
+                Standard ist 75 %. Das heißt: drei von vier simulierten
+                Verläufen erreichen dein Ziel. Du kannst den Wert anpassen,
+                wenn du besonders vorsichtig oder offensiver planen willst.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Aktuell {formatPercentFromRate(goalSettings.requiredProbability)}
+              </p>
+            </div>
           )}
         </div>
       </div>

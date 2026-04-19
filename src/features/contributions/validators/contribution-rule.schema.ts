@@ -13,7 +13,7 @@ export const contributionRuleSchema = z.object({
     .number({
       invalid_type_error: "Bitte gib einen gueltigen Monatsbetrag ein.",
     })
-    .positive("Der Monatsbetrag muss groesser als 0 sein."),
+    .nonnegative("Der Monatsbetrag darf nicht negativ sein."),
 });
 
 export type ContributionRuleFormValues = z.infer<typeof contributionRuleSchema>;
