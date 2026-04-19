@@ -16,6 +16,10 @@ import { addMonths, getCurrentMonthStart, toMonthKey } from "@/features/contribu
 const ROUNDING_STEP = 100;
 const MAX_MONTHLY_CONTRIBUTION = 100000;
 const MAX_BINARY_SEARCH_ITERATIONS = 14;
+export const GOAL_MONTE_CARLO_RUNS = 10000;
+export const GOAL_MONTE_CARLO_SEED = 20260419;
+const LEAN_PLAN_REQUIRED_PROBABILITY = 0.6;
+const SAFE_PLAN_REQUIRED_PROBABILITY = 0.9;
 
 function roundCurrency(value: number) {
   return Math.round(value * 100) / 100;
@@ -23,6 +27,16 @@ function roundCurrency(value: number) {
 
 function roundUpToStep(value: number, step: number) {
   return Math.ceil(value / step) * step;
+}
+
+function withRequiredProbability(
+  goalSettings: GoalSettings,
+  requiredProbability: number,
+) {
+  return {
+    ...goalSettings,
+    requiredProbability,
+  };
 }
 
 export function getTargetMonthForYear(targetYear: number) {
@@ -165,6 +179,7 @@ function simulatePlan(params: {
   contributionRules: ContributionRule[];
   lumpSums: LumpSumContribution[];
   goalSettings: GoalSettings;
+  seed?: number;
 }): {
   simulation: MonteCarloSimulation;
   evaluation: GoalEvaluation;
@@ -178,6 +193,7 @@ function simulatePlan(params: {
     contributionRules,
     lumpSums,
     goalSettings,
+    seed,
   } = params;
   const monthsAhead = Math.max(getTargetMonthIndex(goalSettings.targetYear) + 1, 1);
   const contributionTimeline = buildContributionTimelinePreview(
@@ -194,7 +210,8 @@ function simulatePlan(params: {
   const simulation = runMonteCarloSimulation({
     assumptions,
     allocationTimeline,
-    runs: 1000,
+    runs: GOAL_MONTE_CARLO_RUNS,
+    seed,
   });
   const evaluation = evaluateGoalAgainstSimulation({
     goalSettings,
@@ -249,7 +266,8 @@ export function findRequiredMonthlyContribution(params: {
     const simulation = runMonteCarloSimulation({
       assumptions,
       allocationTimeline,
-      runs: 1000,
+      runs: GOAL_MONTE_CARLO_RUNS,
+      seed: GOAL_MONTE_CARLO_SEED,
     });
     const evaluation = evaluateGoalAgainstSimulation({
       goalSettings,
@@ -350,7 +368,6 @@ export function comparePlans(params: {
   existingRules: ContributionRule[];
   lumpSums: LumpSumContribution[];
   goalSettings: GoalSettings;
-  optimizationResult: GoalOptimizationResult;
 }): GoalPlanComparison[] {
   const {
     assumptions,
@@ -360,7 +377,6 @@ export function comparePlans(params: {
     existingRules,
     lumpSums,
     goalSettings,
-    optimizationResult,
   } = params;
   const currentPlan = simulatePlan({
     assumptions,
@@ -370,14 +386,40 @@ export function comparePlans(params: {
     contributionRules: existingRules,
     lumpSums,
     goalSettings,
+    seed: GOAL_MONTE_CARLO_SEED,
   });
-  const optimizedContribution = optimizationResult.requiredMonthlyContribution;
-  const ambitiousContribution = optimizedContribution + optimizationResult.roundingStep;
+  const leanGoalSettings = withRequiredProbability(
+    goalSettings,
+    LEAN_PLAN_REQUIRED_PROBABILITY,
+  );
+  const safeGoalSettings = withRequiredProbability(
+    goalSettings,
+    SAFE_PLAN_REQUIRED_PROBABILITY,
+  );
+  const leanPlan = findRequiredMonthlyContribution({
+    assumptions,
+    allocationRules,
+    overrides,
+    portfolioEtfs,
+    existingRules,
+    lumpSums,
+    goalSettings: leanGoalSettings,
+  });
+  const safePlan = findRequiredMonthlyContribution({
+    assumptions,
+    allocationRules,
+    overrides,
+    portfolioEtfs,
+    existingRules,
+    lumpSums,
+    goalSettings: safeGoalSettings,
+  });
 
   const buildComparisonForContribution = (
     key: GoalPlanComparison["key"],
     label: string,
     monthlyContribution: number,
+    comparisonGoalSettings: GoalSettings,
   ): GoalPlanComparison => {
     const contributionRules =
       key === "current"
@@ -410,7 +452,8 @@ export function comparePlans(params: {
       portfolioEtfs,
       contributionRules,
       lumpSums,
-      goalSettings,
+      goalSettings: comparisonGoalSettings,
+      seed: GOAL_MONTE_CARLO_SEED,
     });
 
     return {
@@ -422,7 +465,13 @@ export function comparePlans(params: {
     };
   };
 
-  return [
+  const comparisons: GoalPlanComparison[] = [
+    buildComparisonForContribution(
+      "optimized",
+      "Sparsamer Plan",
+      leanPlan.requiredMonthlyContribution,
+      leanGoalSettings,
+    ),
     {
       key: "current",
       label: "Aktueller Plan",
@@ -430,14 +479,22 @@ export function comparePlans(params: {
       evaluation: currentPlan.evaluation,
     },
     buildComparisonForContribution(
-      "optimized",
-      "Optimierter Plan",
-      optimizedContribution,
-    ),
-    buildComparisonForContribution(
       "ambitious",
-      "Ambitionierter Plan",
-      ambitiousContribution,
+      "Sicherer Plan",
+      safePlan.requiredMonthlyContribution,
+      safeGoalSettings,
     ),
   ];
+
+  return comparisons.filter((comparison) => {
+    if (comparison.key === "optimized") {
+      return leanPlan.isReachableWithinSearchRange;
+    }
+
+    if (comparison.key === "ambitious") {
+      return safePlan.isReachableWithinSearchRange;
+    }
+
+    return true;
+  });
 }

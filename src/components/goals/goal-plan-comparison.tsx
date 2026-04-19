@@ -24,7 +24,7 @@ export function GoalPlanComparison({
           <thead className="bg-secondary/50">
             <tr className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
               <th className="px-5 py-4 font-medium">Plan</th>
-              <th className="px-5 py-4 font-medium">Neue konstante Monatsrate ab naechstem Monat</th>
+              <th className="px-5 py-4 font-medium">Monatsrate</th>
               <th className="px-5 py-4 font-medium">Erfolgswahrscheinlichkeit</th>
               <th className="px-5 py-4 font-medium">P50 am Zielzeitpunkt</th>
               <th className="px-5 py-4 font-medium">Status</th>
@@ -58,10 +58,8 @@ export function GoalPlanComparison({
         </table>
       </div>
       <div className="border-t border-border/80 px-5 py-3 text-xs leading-6 text-muted-foreground">
-        Sonderzahlungen bleiben in allen verglichenen Plaenen erhalten. Im
-        aktuellen Plan fliessen zusaetzlich deine bestehenden monatlichen
-        Beitragsregeln ein, in den Alternativen ab dem naechsten Monat eine
-        konstante Monatsrate.
+        Zwei Vergleichsvarianten zeigen, was dein Plan bei anderer
+        Zielsicherheit kosten würde. Sonderzahlungen bleiben unverändert.
       </div>
     </div>
   );

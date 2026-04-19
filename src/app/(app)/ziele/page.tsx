@@ -14,6 +14,8 @@ import {
   evaluateGoalAgainstSimulation,
   getTargetMonthIndex,
   findRequiredMonthlyContribution,
+  GOAL_MONTE_CARLO_RUNS,
+  GOAL_MONTE_CARLO_SEED,
 } from "@/features/goals/lib/goal-optimization";
 import { getGoalSettings } from "@/features/goals/queries/get-goal-settings";
 import { requireUser } from "@/lib/auth/guard";
@@ -102,7 +104,8 @@ export default async function GoalsPage() {
   const currentSimulation = runMonteCarloSimulation({
     assumptions,
     allocationTimeline,
-    runs: 1000,
+    runs: GOAL_MONTE_CARLO_RUNS,
+    seed: GOAL_MONTE_CARLO_SEED,
   });
   const currentEvaluation = evaluateGoalAgainstSimulation({
     goalSettings,
@@ -125,7 +128,6 @@ export default async function GoalsPage() {
     existingRules: contributionRules,
     lumpSums,
     goalSettings,
-    optimizationResult,
   });
   const notices = buildGoalNotices({
     goalSettings,
@@ -235,9 +237,8 @@ export default async function GoalsPage() {
             Planvergleich
           </h3>
           <p className="text-sm leading-6 text-muted-foreground">
-            Wir vergleichen deinen heutigen Plan mit Varianten, in denen nur der
-            laufende Monatsbeitrag angepasst wird. Bereits geplante
-            Sonderzahlungen bleiben in allen Fällen unverändert erhalten.
+            Zwei Vergleichsvarianten zeigen, was dein Plan bei anderer
+            Zielsicherheit kosten würde. Sonderzahlungen bleiben unverändert.
           </p>
         </div>
         <GoalPlanComparison comparisons={comparisons} />

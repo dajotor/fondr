@@ -287,16 +287,23 @@ export function runMonteCarloSimulation(params: {
   assumptions: ProjectionAssumption[];
   allocationTimeline: AllocationTimelineMonth[];
   runs?: number;
+  seed?: number;
 }): MonteCarloSimulation {
-  const { assumptions, allocationTimeline, runs = DEFAULT_RUNS } = params;
+  const {
+    assumptions,
+    allocationTimeline,
+    runs = DEFAULT_RUNS,
+    seed,
+  } = params;
   const rawPaths: number[][] = [];
   const endValues: number[] = [];
   const random = createDeterministicRandom(
-    buildSimulationSeed({
-      assumptions,
-      allocationTimeline,
-      runs,
-    }),
+    seed ??
+      buildSimulationSeed({
+        assumptions,
+        allocationTimeline,
+        runs,
+      }),
   );
 
   for (let runIndex = 0; runIndex < runs; runIndex += 1) {

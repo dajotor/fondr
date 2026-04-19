@@ -17,7 +17,7 @@ export function DashboardSummaryCards({
           {formatCurrencyWhole(overview.portfolioOverview.totalValue)}
         </p>
         <p className="mt-3 text-sm leading-6 text-white/80">
-          So viel ist dein Hauptportfolio nach heutigem Stand wert.
+          So viel ist dein Portfolio nach heutigem Stand wert.
         </p>
       </div>
 
