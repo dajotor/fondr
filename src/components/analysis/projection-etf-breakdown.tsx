@@ -26,7 +26,7 @@ export function ProjectionEtfBreakdown({ month }: ProjectionEtfBreakdownProps) {
         {month.etfs.map((etfMonth) => (
           <div
             key={etfMonth.etfId}
-            className="flex items-center justify-between gap-4 rounded-2xl border border-border/80 bg-card px-4 py-3"
+            className="flex flex-col gap-2 rounded-2xl border border-border/80 bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
           >
             <div>
               <p className="text-sm font-medium text-foreground">
@@ -34,7 +34,7 @@ export function ProjectionEtfBreakdown({ month }: ProjectionEtfBreakdownProps) {
               </p>
               <p className="text-xs text-muted-foreground">{etfMonth.isin}</p>
             </div>
-            <div className="text-right">
+            <div className="sm:text-right">
               <p className="text-sm font-medium text-foreground">
                 {formatCurrency(etfMonth.endValue)}
               </p>
