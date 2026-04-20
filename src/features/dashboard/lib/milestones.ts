@@ -1,21 +1,39 @@
-import type { MonteCarloPercentilePoint } from "@/domain/analysis/types";
 import type { DashboardMilestone } from "@/domain/dashboard/types";
 import { addMonths, getCurrentMonthStart } from "@/features/contributions/lib/months";
 
 const DEFAULT_ROUND_STEP = 100_000;
 const ABOVE_GOAL_STEPS = [0.25, 0.5];
+const SUCCESS_THRESHOLD = 0.5;
 
 function roundUpTo(value: number, step: number) {
   return Math.ceil(value / step) * step;
 }
 
-function findFirstMonthAtOrAbove(
-  percentileTimeline: MonteCarloPercentilePoint[],
+function findFirstMonthWithProbability(
+  rawPaths: number[][],
   threshold: number,
 ) {
-  for (let index = 0; index < percentileTimeline.length; index += 1) {
-    if (percentileTimeline[index].p50 >= threshold) {
-      return index;
+  if (rawPaths.length === 0) {
+    return null;
+  }
+
+  const monthCount = rawPaths[0]?.length ?? 0;
+
+  for (let monthIndex = 0; monthIndex < monthCount; monthIndex += 1) {
+    let aboveCount = 0;
+
+    for (let pathIndex = 0; pathIndex < rawPaths.length; pathIndex += 1) {
+      const path = rawPaths[pathIndex];
+
+      if ((path[monthIndex] ?? 0) >= threshold) {
+        aboveCount += 1;
+      }
+    }
+
+    const probability = aboveCount / rawPaths.length;
+
+    if (probability >= SUCCESS_THRESHOLD) {
+      return monthIndex;
     }
   }
 
@@ -31,7 +49,7 @@ function buildMilestone(
   label: string,
   threshold: number,
   currentWealth: number,
-  percentileTimeline: MonteCarloPercentilePoint[],
+  rawPaths: number[][],
 ): DashboardMilestone {
   if (currentWealth >= threshold) {
     return {
@@ -43,7 +61,7 @@ function buildMilestone(
     };
   }
 
-  const firstMonth = findFirstMonthAtOrAbove(percentileTimeline, threshold);
+  const firstMonth = findFirstMonthWithProbability(rawPaths, threshold);
 
   if (firstMonth === null) {
     return {
@@ -67,15 +85,15 @@ function buildMilestone(
 type BuildMilestonesParams = {
   currentWealth: number;
   targetWealth: number | null;
-  percentileTimeline: MonteCarloPercentilePoint[];
+  rawPaths: number[][];
 };
 
 export function buildDashboardMilestones(
   params: BuildMilestonesParams,
 ): DashboardMilestone[] {
-  const { currentWealth, targetWealth, percentileTimeline } = params;
+  const { currentWealth, targetWealth, rawPaths } = params;
 
-  if (percentileTimeline.length === 0) {
+  if (rawPaths.length === 0 || (rawPaths[0]?.length ?? 0) === 0) {
     return [];
   }
 
@@ -87,7 +105,7 @@ export function buildDashboardMilestones(
         "Nächste Schwelle",
         firstThreshold,
         currentWealth,
-        percentileTimeline,
+        rawPaths,
       ),
     ];
   }
@@ -110,13 +128,13 @@ export function buildDashboardMilestones(
         "Nächste Schwelle",
         futureThresholds[0],
         currentWealth,
-        percentileTimeline,
+        rawPaths,
       ),
       buildMilestone(
         "Weiterer Horizont",
         futureThresholds[1],
         currentWealth,
-        percentileTimeline,
+        rawPaths,
       ),
     ];
   }
@@ -144,6 +162,6 @@ export function buildDashboardMilestones(
   thresholds.push({ label: "Zielvermögen", value: targetWealth });
 
   return thresholds.map(({ label, value }) =>
-    buildMilestone(label, value, currentWealth, percentileTimeline),
+    buildMilestone(label, value, currentWealth, rawPaths),
   );
 }

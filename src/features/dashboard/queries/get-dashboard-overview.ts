@@ -368,9 +368,8 @@ export async function getDashboardOverview(
       ? buildDashboardMilestones({
           currentWealth: portfolioOverview.totalValue,
           targetWealth: goalSettings?.targetWealth ?? null,
-          percentileTimeline: simulation.percentileTimeline.slice(
-            0,
-            dashboardForecastMonthsAhead,
+          rawPaths: simulation.rawPaths.map((path) =>
+            path.slice(0, dashboardForecastMonthsAhead),
           ),
         })
       : [];

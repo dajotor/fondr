@@ -39,7 +39,11 @@ export default async function DashboardPage() {
       <DashboardSummaryCards overview={overview} />
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
         <DashboardStatusPanel overview={overview} />
-        <DashboardMilestones milestones={overview.milestones} />
+        <DashboardMilestones
+          milestones={overview.milestones}
+          currentWealth={overview.portfolioOverview.totalValue}
+          targetWealth={overview.goalSettings?.targetWealth ?? null}
+        />
       </div>
 
       <DashboardNextActions steps={overview.setupSteps} />
