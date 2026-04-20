@@ -1,7 +1,7 @@
 import type { GoalEvaluation, GoalSettings } from "@/domain/goals/types";
+import { resolveGoalStatus } from "@/features/goals/lib/goal-status";
 import { formatCurrencyWhole } from "@/lib/formatting/currency";
 import {
-  formatPercentFromRate,
   formatProbabilityFromRate,
 } from "@/lib/formatting/number";
 
@@ -14,6 +14,11 @@ export function GoalStatusCards({
   goalSettings,
   evaluation,
 }: GoalStatusCardsProps) {
+  const goalStatus = resolveGoalStatus({
+    goalSettings,
+    goalEvaluation: evaluation,
+  });
+
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <div className="app-kpi">
@@ -30,13 +35,18 @@ export function GoalStatusCards({
       </div>
 
       <div className="app-kpi">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Wie weit bist du davon entfernt?</p>
-        <p className="mt-3 font-display text-3xl font-semibold tracking-tight text-foreground">
-          {evaluation.isGoalMet ? "Auf gutem Weg" : "Noch nicht im Zielkorridor"}
+        <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          Wie steht dein Plan?
+        </p>
+        <p
+          className={`mt-3 font-display text-3xl font-semibold tracking-tight ${
+            goalStatus.kind === "on-track" ? "text-cyan-300" : "text-foreground"
+          }`}
+        >
+          {goalStatus.label}
         </p>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Abstand zur gewünschten Erfolgswahrscheinlichkeit:{" "}
-          {formatPercentFromRate(evaluation.probabilityGap)}
+          {goalStatus.description}
         </p>
       </div>
 

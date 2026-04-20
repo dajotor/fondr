@@ -2,8 +2,8 @@ import Link from "next/link";
 
 import type { DashboardOverview } from "@/domain/dashboard/types";
 import { DASHBOARD_FORECAST_YEARS } from "@/features/analysis/lib/horizon";
+import { resolveGoalStatus } from "@/features/goals/lib/goal-status";
 import { formatCurrencyWhole } from "@/lib/formatting/currency";
-import { formatProbabilityFromRate } from "@/lib/formatting/number";
 
 type DashboardStatusPanelProps = {
   overview: DashboardOverview;
@@ -12,6 +12,11 @@ type DashboardStatusPanelProps = {
 export function DashboardStatusPanel({
   overview,
 }: DashboardStatusPanelProps) {
+  const goalStatus = resolveGoalStatus({
+    goalSettings: overview.goalSettings,
+    goalEvaluation: overview.goalEvaluation,
+  });
+
   return (
     <div className="app-card">
       <div className="mb-6 space-y-2">
@@ -45,9 +50,7 @@ export function DashboardStatusPanel({
               : "Noch nicht festgelegt"}
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-300">
-            {overview.goalSettings && overview.goalEvaluation
-              ? `Mit deinem heutigen Plan liegt die Erfolgswahrscheinlichkeit bei ${formatProbabilityFromRate(overview.goalEvaluation.successProbability)}.`
-              : "Sobald du ein Ziel festlegst, zeigt dir FONDR, wie gut dein Plan dazu passt."}
+            {goalStatus.description}
           </p>
         </div>
       </div>
