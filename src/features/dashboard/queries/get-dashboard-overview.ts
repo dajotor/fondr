@@ -8,7 +8,11 @@ import { buildAllocationTimelinePreview } from "@/features/allocation/lib/calcul
 import { getAllocationRules } from "@/features/allocation/queries/get-allocation-rules";
 import { getManualAllocationOverrides } from "@/features/allocation/queries/get-manual-allocation-overrides";
 import { getPortfolioAllocationEtfs } from "@/features/allocation/queries/get-portfolio-allocation-etfs";
-import { runMonteCarloSimulation } from "@/features/analysis/lib/monte-carlo";
+import {
+  DEFAULT_MONTE_CARLO_RUNS,
+  DEFAULT_MONTE_CARLO_SEED,
+  runMonteCarloSimulation,
+} from "@/features/analysis/lib/monte-carlo";
 import { projectPortfolioDeterministically } from "@/features/analysis/lib/projection";
 import { getProjectionAssumptions } from "@/features/analysis/queries/get-projection-assumptions";
 import { buildContributionTimelinePreview } from "@/features/contributions/lib/timeline";
@@ -324,7 +328,8 @@ export async function getDashboardOverview(
       ? runMonteCarloSimulation({
           assumptions,
           allocationTimeline,
-          runs: 1000,
+          runs: DEFAULT_MONTE_CARLO_RUNS,
+          seed: DEFAULT_MONTE_CARLO_SEED,
         })
       : null;
   const dashboardForecastMonthIndex = Math.max(

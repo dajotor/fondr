@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { DashboardOverview } from "@/domain/dashboard/types";
+import { DASHBOARD_FORECAST_YEARS } from "@/features/analysis/lib/horizon";
 import { formatCurrencyWhole } from "@/lib/formatting/currency";
 import { formatProbabilityFromRate } from "@/lib/formatting/number";
 
@@ -25,7 +26,7 @@ export function DashboardStatusPanel({
       <div className="grid gap-4 md:grid-cols-2">
         <div className="app-card-muted">
           <p className="text-sm font-medium text-slate-300">
-            Prognose nach {overview.forecastYears} Jahren
+            Prognose nach {DASHBOARD_FORECAST_YEARS} Jahren
           </p>
           <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-foreground md:text-3xl">
             {formatCurrencyWhole(overview.typicalEndValue)}
@@ -53,7 +54,7 @@ export function DashboardStatusPanel({
 
       <div className="mt-6 flex flex-wrap gap-3">
         <Link
-          href={`/analyse?years=${overview.forecastYears}`}
+          href={`/analyse?years=${DASHBOARD_FORECAST_YEARS}`}
           className="app-button-primary"
         >
           Analyse öffnen

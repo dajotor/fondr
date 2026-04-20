@@ -12,6 +12,8 @@ import {
 } from "@/features/analysis/lib/projection";
 
 const DEFAULT_RUNS = 1000;
+export const DEFAULT_MONTE_CARLO_RUNS = 10000;
+export const DEFAULT_MONTE_CARLO_SEED = 20260419;
 const DEFAULT_BUCKETS = 12;
 
 function roundCurrency(value: number) {

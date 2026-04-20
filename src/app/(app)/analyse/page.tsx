@@ -7,9 +7,16 @@ import { ProjectionChart } from "@/components/analysis/projection-chart";
 import { ProjectionEtfBreakdown } from "@/components/analysis/projection-etf-breakdown";
 import { ProjectionMilestones } from "@/components/analysis/projection-milestones";
 import { ProjectionSummary } from "@/components/analysis/projection-summary";
+import type { MonteCarloSimulation } from "@/domain/analysis/types";
 import { buildAllocationTimelinePreview } from "@/features/allocation/lib/calculate";
 import { normalizeAnalysisYears } from "@/features/analysis/lib/horizon";
-import { runMonteCarloSimulation } from "@/features/analysis/lib/monte-carlo";
+import {
+  buildEndValueDistribution,
+  calculatePercentile,
+  DEFAULT_MONTE_CARLO_RUNS,
+  DEFAULT_MONTE_CARLO_SEED,
+  runMonteCarloSimulation,
+} from "@/features/analysis/lib/monte-carlo";
 import { getAllocationRules } from "@/features/allocation/queries/get-allocation-rules";
 import { getManualAllocationOverrides } from "@/features/allocation/queries/get-manual-allocation-overrides";
 import { getPortfolioAllocationEtfs } from "@/features/allocation/queries/get-portfolio-allocation-etfs";
@@ -18,6 +25,8 @@ import { getProjectionAssumptions } from "@/features/analysis/queries/get-projec
 import { buildContributionTimelinePreview } from "@/features/contributions/lib/timeline";
 import { getContributionRules } from "@/features/contributions/queries/get-contribution-rules";
 import { getLumpSumContributions } from "@/features/contributions/queries/get-lump-sum-contributions";
+import { getTargetMonthIndex } from "@/features/goals/lib/goal-optimization";
+import { getGoalSettings } from "@/features/goals/queries/get-goal-settings";
 import { requireUser } from "@/lib/auth/guard";
 import { buildAnalysisNotices } from "@/lib/plausibility";
 
@@ -26,6 +35,26 @@ type AnalysisPageProps = {
     years?: string;
   }>;
 };
+
+function truncateSimulation(
+  simulation: MonteCarloSimulation,
+  monthsAhead: number,
+): MonteCarloSimulation {
+  const rawPaths = simulation.rawPaths.map((path) => path.slice(0, monthsAhead));
+  const endValues = rawPaths.map((path) => path.at(-1) ?? 0);
+  const percentileTimeline = simulation.percentileTimeline.slice(0, monthsAhead);
+
+  return {
+    runs: simulation.runs,
+    rawPaths,
+    endValues,
+    percentileTimeline,
+    p10EndValue: calculatePercentile(endValues, 0.1),
+    p50EndValue: calculatePercentile(endValues, 0.5),
+    p90EndValue: calculatePercentile(endValues, 0.9),
+    distribution: buildEndValueDistribution(endValues),
+  };
+}
 
 export default async function AnalysisPage({ searchParams }: AnalysisPageProps) {
   const params = await searchParams;
@@ -39,6 +68,7 @@ export default async function AnalysisPage({ searchParams }: AnalysisPageProps) 
     allocationRules,
     overrides,
     portfolioEtfs,
+    goalSettings,
   ] = await Promise.all([
     getProjectionAssumptions(user.id),
     getContributionRules(user.id),
@@ -46,6 +76,7 @@ export default async function AnalysisPage({ searchParams }: AnalysisPageProps) 
     getAllocationRules(user.id),
     getManualAllocationOverrides(user.id),
     getPortfolioAllocationEtfs(user.id),
+    getGoalSettings(user.id),
   ]);
 
   const contributionTimeline = buildContributionTimelinePreview(
@@ -59,15 +90,42 @@ export default async function AnalysisPage({ searchParams }: AnalysisPageProps) 
     overrides,
     portfolioEtfs,
   );
+  const goalMonthsAhead = Math.max(
+    goalSettings ? getTargetMonthIndex(goalSettings.targetYear) + 1 : 0,
+    1,
+  );
+  const simulationMonthsAhead = Math.max(monthsAhead, goalMonthsAhead);
+  const simulationContributionTimeline =
+    simulationMonthsAhead === monthsAhead
+      ? contributionTimeline
+      : buildContributionTimelinePreview(
+          contributionRules,
+          lumpSums,
+          simulationMonthsAhead,
+        );
+  const simulationAllocationTimeline =
+    simulationMonthsAhead === monthsAhead
+      ? allocationTimeline
+      : buildAllocationTimelinePreview(
+          simulationContributionTimeline,
+          allocationRules,
+          overrides,
+          portfolioEtfs,
+        );
   const projection = projectPortfolioDeterministically({
     assumptions,
     allocationTimeline,
   });
-  const monteCarloSimulation = runMonteCarloSimulation({
+  const fullMonteCarloSimulation = runMonteCarloSimulation({
     assumptions,
-    allocationTimeline,
-    runs: 1000,
+    allocationTimeline: simulationAllocationTimeline,
+    runs: DEFAULT_MONTE_CARLO_RUNS,
+    seed: DEFAULT_MONTE_CARLO_SEED,
   });
+  const monteCarloSimulation = truncateSimulation(
+    fullMonteCarloSimulation,
+    monthsAhead,
+  );
   const notices = buildAnalysisNotices({
     assumptions,
     contributionRules,

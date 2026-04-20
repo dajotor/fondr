@@ -31,7 +31,7 @@ export function AppNav() {
           pathname === item.href || pathname.startsWith(`${item.href}/`);
         const yearsParam = searchParams.get("years") ?? storedYears;
         const href =
-          yearsParam && ["/dashboard", "/analyse"].includes(item.href)
+          yearsParam && item.href === "/analyse"
             ? `${item.href}?years=${yearsParam}`
             : item.href;
 

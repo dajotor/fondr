@@ -9,16 +9,20 @@ import type {
 import type { AllocationEtfOption, AllocationRuleView, ManualAllocationOverrideView } from "@/domain/allocation/types";
 import type { ProjectionAssumption } from "@/domain/analysis/types";
 import { buildAllocationTimelinePreview } from "@/features/allocation/lib/calculate";
-import { runMonteCarloSimulation } from "@/features/analysis/lib/monte-carlo";
+import {
+  DEFAULT_MONTE_CARLO_RUNS,
+  DEFAULT_MONTE_CARLO_SEED,
+  runMonteCarloSimulation,
+} from "@/features/analysis/lib/monte-carlo";
 import { buildContributionTimelinePreview, resolveMonthlyContributionForMonth } from "@/features/contributions/lib/timeline";
 import { addMonths, getCurrentMonthStart, toMonthKey } from "@/features/contributions/lib/months";
 
 const ROUNDING_STEP = 100;
 const MAX_MONTHLY_CONTRIBUTION = 100000;
 const MAX_BINARY_SEARCH_ITERATIONS = 14;
-export const GOAL_MONTE_CARLO_RUNS = 10000;
+export const GOAL_MONTE_CARLO_RUNS = DEFAULT_MONTE_CARLO_RUNS;
 export const GOAL_MONTE_CARLO_RUNS_SEARCH = 2500;
-export const GOAL_MONTE_CARLO_SEED = 20260419;
+export const GOAL_MONTE_CARLO_SEED = DEFAULT_MONTE_CARLO_SEED;
 const LEAN_PLAN_REQUIRED_PROBABILITY = 0.6;
 const SAFE_PLAN_REQUIRED_PROBABILITY = 0.9;
 

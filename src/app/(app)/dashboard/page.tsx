@@ -2,21 +2,16 @@ import { DashboardMiniTrend } from "@/components/dashboard/dashboard-mini-trend"
 import { DashboardNextActions } from "@/components/dashboard/dashboard-next-actions";
 import { DashboardStatusPanel } from "@/components/dashboard/dashboard-status-panel";
 import { DashboardSummaryCards } from "@/components/dashboard/dashboard-summary-cards";
-import { normalizeAnalysisYears } from "@/features/analysis/lib/horizon";
+import { DASHBOARD_FORECAST_YEARS } from "@/features/analysis/lib/horizon";
 import { getDashboardOverview } from "@/features/dashboard/queries/get-dashboard-overview";
 import { requireUser } from "@/lib/auth/guard";
 
-type DashboardPageProps = {
-  searchParams: Promise<{
-    years?: string;
-  }>;
-};
-
-export default async function DashboardPage({ searchParams }: DashboardPageProps) {
-  const params = await searchParams;
-  const years = normalizeAnalysisYears(params.years);
+export default async function DashboardPage() {
   const user = await requireUser();
-  const overview = await getDashboardOverview(user.id, years);
+  const overview = await getDashboardOverview(
+    user.id,
+    DASHBOARD_FORECAST_YEARS,
+  );
 
   return (
     <section className="space-y-8">
