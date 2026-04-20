@@ -13,7 +13,6 @@ type DashboardMilestonesProps = {
 };
 
 const TIMELINE_HEIGHT = 8;
-const MARKER_RADIUS = 6;
 const ANIMATION_DURATION_MS = 1000;
 
 function formatMonthsFromNow(months: number) {
@@ -122,65 +121,46 @@ export function DashboardMilestones({
         </p>
       </div>
 
-      <div className="mb-6">
-        <svg
-          viewBox="0 0 400 40"
-          className="h-10 w-full"
-          preserveAspectRatio="none"
-          role="img"
-          aria-label={`Fortschritt: ${progressPercent} Prozent des Zielvermögens erreicht`}
-        >
-          <defs>
-            <linearGradient id="milestoneProgressGradient" x1="0%" x2="100%" y1="0%" y2="0%">
-              <stop offset="0%" stopColor="rgba(34, 211, 238, 0.6)" />
-              <stop offset="100%" stopColor="rgba(103, 232, 249, 1)" />
-            </linearGradient>
-          </defs>
-          <rect
-            x="0"
-            y={20 - TIMELINE_HEIGHT / 2}
-            width="400"
-            height={TIMELINE_HEIGHT}
-            rx={TIMELINE_HEIGHT / 2}
-            fill="rgba(148, 163, 184, 0.12)"
-          />
-          <rect
-            x="0"
-            y={20 - TIMELINE_HEIGHT / 2}
-            width={400 * progressRatio}
-            height={TIMELINE_HEIGHT}
-            rx={TIMELINE_HEIGHT / 2}
-            fill="url(#milestoneProgressGradient)"
-          />
-          <circle
-            cx="0"
-            cy="20"
-            r={MARKER_RADIUS}
-            fill="rgb(34, 211, 238)"
-            stroke="rgb(15, 20, 22)"
-            strokeWidth="2"
-          />
-          {milestones.map((milestone) => {
-            const position = wealthToPosition(
-              milestone.targetWealth,
-              currentWealth,
-              targetWealth,
-            );
-            const cx = position * 400;
-            const isReached = milestone.status === "reached";
-            return (
-              <circle
-                key={`${milestone.label}-${milestone.targetWealth}`}
-                cx={cx}
-                cy="20"
-                r={MARKER_RADIUS}
-                fill={isReached ? "rgb(34, 211, 238)" : "rgb(241, 245, 249)"}
-                stroke="rgb(15, 20, 22)"
-                strokeWidth="2"
-              />
-            );
-          })}
-        </svg>
+      <div
+        className="relative mb-6 h-4 w-full"
+        role="img"
+        aria-label={`Fortschritt: ${progressPercent} Prozent des Zielvermögens erreicht`}
+      >
+        <div
+          className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-slate-400/12"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute left-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-cyan-300"
+          style={{
+            width: `${progressRatio * 100}%`,
+            transition: "none",
+          }}
+          aria-hidden="true"
+        />
+        <div
+          className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300 ring-2 ring-[rgb(15,20,22)]"
+          style={{ left: "0%" }}
+          aria-label="Heute"
+        />
+        {milestones.map((milestone) => {
+          const position = wealthToPosition(
+            milestone.targetWealth,
+            currentWealth,
+            targetWealth,
+          );
+          const isReached = milestone.status === "reached";
+          return (
+            <div
+              key={`${milestone.label}-${milestone.targetWealth}`}
+              className={`absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-[rgb(15,20,22)] ${
+                isReached ? "bg-cyan-300" : "bg-slate-100"
+              }`}
+              style={{ left: `${position * 100}%` }}
+              aria-label={`${milestone.label}: ${formatCurrencyWhole(milestone.targetWealth)}`}
+            />
+          );
+        })}
       </div>
 
       <ul className="space-y-2.5">
