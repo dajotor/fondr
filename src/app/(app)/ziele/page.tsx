@@ -2,6 +2,7 @@ import { GoalOptimizationCard } from "@/components/goals/goal-optimization-card"
 import { GoalPlanComparison } from "@/components/goals/goal-plan-comparison";
 import { GoalSettingsForm } from "@/components/goals/goal-settings-form";
 import { GoalStatusCards } from "@/components/goals/goal-status-cards";
+import { NoticeList } from "@/components/ui/notice-list";
 import type { GoalSettings } from "@/domain/goals/types";
 import { getAllocationRules } from "@/features/allocation/queries/get-allocation-rules";
 import { getManualAllocationOverrides } from "@/features/allocation/queries/get-manual-allocation-overrides";
@@ -198,25 +199,14 @@ export default async function GoalsPage() {
         goalSettings={goalSettings}
         evaluation={currentEvaluation}
       />
-      {notices
-        .filter((notice) => notice.category === "plausibility" && notice.id.startsWith("goal-"))
-        .map((notice) => (
-          <details
-            key={notice.id}
-            className="text-sm text-foreground"
-          >
-            <summary className="cursor-pointer list-none font-medium">
-              {notice.title}
-            </summary>
-            <p className="mt-2 leading-6 text-muted-foreground">
-              {notice.body}
-            </p>
-          </details>
-        ))}
-      <p className="text-xs leading-6 text-muted-foreground">
-        Vereinfachtes Modell: ohne Steuern, Inflation, Rebalancing und
-        Entnahme. Monte-Carlo zeigt Bandbreiten, keine Garantie.
-      </p>
+      <NoticeList
+        title="Hinweise zu deinem Plan"
+        items={notices.filter(
+          (notice) =>
+            notice.id !== "goal-horizon-adjusted" &&
+            notice.id !== "analysis-methodology",
+        )}
+      />
 
       <div className="app-card">
         <div className="space-y-2">
@@ -249,6 +239,13 @@ export default async function GoalsPage() {
           </p>
         </div>
         <GoalPlanComparison comparisons={comparisons} />
+      </div>
+
+      <div className="mt-4 border-t border-border/40 pt-6">
+        <p className="text-xs leading-6 text-muted-foreground">
+          Vereinfachtes Modell: ohne Steuern, Inflation, Rebalancing und
+          Entnahme. Monte-Carlo zeigt Bandbreiten, keine Garantie.
+        </p>
       </div>
     </section>
   );
