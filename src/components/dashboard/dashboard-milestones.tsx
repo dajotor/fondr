@@ -12,7 +12,6 @@ type DashboardMilestonesProps = {
   targetWealth: number | null;
 };
 
-const TIMELINE_HEIGHT = 8;
 const ANIMATION_DURATION_MS = 1000;
 
 function formatMonthsFromNow(months: number) {
@@ -102,108 +101,118 @@ export function DashboardMilestones({
   const progressPercent = Math.round((currentWealth / targetWealth) * 100);
 
   return (
-    <div className="app-card">
-      <div className="mb-6 space-y-2">
-        <h3 className="text-2xl font-semibold tracking-[-0.03em] text-foreground">
-          Meilensteine
-        </h3>
-        <p className="text-sm leading-6 text-slate-300">
-          Wegmarken auf dem Weg zu deinem Ziel. Zeitpunkte zeigen, wann mindestens 50 % aller Simulationen den Betrag erreichen.
-        </p>
-      </div>
-
-      <div className="mb-5">
-        <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
-          Aktueller Fortschritt
-        </p>
-        <p className="mt-1 text-3xl font-semibold tracking-[-0.03em] text-foreground">
-          {progressPercent} %
-        </p>
-      </div>
-
+    <div className="app-card relative overflow-hidden">
       <div
-        className="relative mb-6 h-4 w-full"
-        role="img"
-        aria-label={`Fortschritt: ${progressPercent} Prozent des Zielvermögens erreicht`}
-      >
-        <div
-          className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-slate-400/12"
-          aria-hidden="true"
-        />
-        <div
-          className="absolute left-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-cyan-300"
-          style={{
-            width: `${progressRatio * 100}%`,
-            transition: "none",
-          }}
-          aria-hidden="true"
-        />
-        <div
-          className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300 ring-2 ring-[rgb(15,20,22)]"
-          style={{ left: "0%" }}
-          aria-label="Heute"
-        />
-        {milestones.map((milestone) => {
-          const position = wealthToPosition(
-            milestone.targetWealth,
-            currentWealth,
-            targetWealth,
-          );
-          const isReached = milestone.status === "reached";
-          return (
-            <div
-              key={`${milestone.label}-${milestone.targetWealth}`}
-              className={`absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-[rgb(15,20,22)] ${
-                isReached ? "bg-cyan-300" : "bg-slate-100"
-              }`}
-              style={{ left: `${position * 100}%` }}
-              aria-label={`${milestone.label}: ${formatCurrencyWhole(milestone.targetWealth)}`}
-            />
-          );
-        })}
-      </div>
+        className="pointer-events-none absolute -right-16 top-0 h-44 w-44 rounded-full bg-cyan-400/18 blur-3xl"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute left-0 top-20 h-32 w-32 rounded-full bg-cyan-300/12 blur-3xl"
+        aria-hidden="true"
+      />
+      <div className="relative">
+        <div className="mb-6 space-y-2">
+          <h3 className="text-2xl font-semibold tracking-[-0.03em] text-foreground">
+            Meilensteine
+          </h3>
+          <p className="text-sm leading-6 text-slate-300">
+            Wegmarken auf dem Weg zu deinem Ziel. Zeitpunkte zeigen, wann mindestens 50 % aller Simulationen den Betrag erreichen.
+          </p>
+        </div>
 
-      <ul className="space-y-2.5">
-        {milestones.map((milestone) => {
-          const isReached = milestone.status === "reached";
-          const isOutOfHorizon = milestone.status === "out-of-horizon";
-          return (
-            <li
-              key={`${milestone.label}-list-${milestone.targetWealth}`}
-              className="flex items-baseline justify-between gap-4 border-t border-border/40 pt-2.5 first:border-t-0 first:pt-0"
-            >
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">
-                  {milestone.label}
-                </span>
-                <span className="text-base font-semibold tracking-[-0.02em] text-foreground">
-                  {formatCurrencyWhole(milestone.targetWealth)}
-                </span>
-              </div>
-              <div className="text-right">
-                {isReached ? (
-                  <span className="text-xs font-medium uppercase tracking-[0.12em] text-cyan-300">
-                    Erreicht
+        <div className="mb-5">
+          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
+            Aktueller Fortschritt
+          </p>
+          <p className="mt-1 text-4xl font-semibold tracking-[-0.03em] text-foreground">
+            {progressPercent} %
+          </p>
+        </div>
+
+        <div
+          className="relative mb-8 h-5 w-full"
+          role="img"
+          aria-label={`Fortschritt: ${progressPercent} Prozent des Zielvermögens erreicht`}
+        >
+          <div
+            className="absolute left-0 right-0 top-1/2 h-2.5 -translate-y-1/2 rounded-full bg-slate-400/12"
+            aria-hidden="true"
+          />
+          <div
+            className="absolute left-0 top-1/2 h-2.5 -translate-y-1/2 rounded-full bg-cyan-300"
+            style={{
+              width: `${progressRatio * 100}%`,
+              transition: "none",
+            }}
+            aria-hidden="true"
+          />
+          <div
+            className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300 ring-2 ring-[rgb(15,20,22)]"
+            style={{ left: "0%" }}
+            aria-label="Heute"
+          />
+          {milestones.map((milestone) => {
+            const position = wealthToPosition(
+              milestone.targetWealth,
+              currentWealth,
+              targetWealth,
+            );
+            const isReached = milestone.status === "reached";
+            return (
+              <div
+                key={`${milestone.label}-${milestone.targetWealth}`}
+                className={`absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-[rgb(15,20,22)] ${
+                  isReached ? "bg-cyan-300" : "bg-slate-100"
+                }`}
+                style={{ left: `${position * 100}%` }}
+                aria-label={`${milestone.label}: ${formatCurrencyWhole(milestone.targetWealth)}`}
+              />
+            );
+          })}
+        </div>
+
+        <ul className="space-y-2.5">
+          {milestones.map((milestone) => {
+            const isReached = milestone.status === "reached";
+            const isOutOfHorizon = milestone.status === "out-of-horizon";
+            return (
+              <li
+                key={`${milestone.label}-list-${milestone.targetWealth}`}
+                className="flex items-baseline justify-between gap-4 border-t border-border/40 pt-2.5 first:border-t-0 first:pt-0"
+              >
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">
+                    {milestone.label}
                   </span>
-                ) : isOutOfHorizon ? (
-                  <span className="text-xs leading-5 text-slate-400">
-                    Nicht in 10 Jahren
+                  <span className="text-base font-semibold tracking-[-0.02em] text-foreground">
+                    {formatCurrencyWhole(milestone.targetWealth)}
                   </span>
-                ) : milestone.monthsFromNow !== null && milestone.targetMonth ? (
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-xs leading-5 text-slate-300">
-                      {formatMonthsFromNow(milestone.monthsFromNow)}
+                </div>
+                <div className="text-right">
+                  {isReached ? (
+                    <span className="text-xs font-medium uppercase tracking-[0.12em] text-cyan-300">
+                      Erreicht
                     </span>
-                    <span className="text-[11px] leading-4 text-slate-400">
-                      {formatMonthLabel(milestone.targetMonth)}
+                  ) : isOutOfHorizon ? (
+                    <span className="text-xs leading-5 text-slate-400">
+                      Nicht in 10 Jahren
                     </span>
-                  </div>
-                ) : null}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+                  ) : milestone.monthsFromNow !== null && milestone.targetMonth ? (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-xs leading-5 text-slate-300">
+                        {formatMonthsFromNow(milestone.monthsFromNow)}
+                      </span>
+                      <span className="text-[11px] leading-4 text-slate-400">
+                        {formatMonthLabel(milestone.targetMonth)}
+                      </span>
+                    </div>
+                  ) : null}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import { DashboardMilestones } from "@/components/dashboard/dashboard-milestones";
 import { DashboardNextActions } from "@/components/dashboard/dashboard-next-actions";
-import { DashboardStatusPanel } from "@/components/dashboard/dashboard-status-panel";
 import { DashboardSummaryCards } from "@/components/dashboard/dashboard-summary-cards";
 import { DASHBOARD_FORECAST_YEARS } from "@/features/analysis/lib/horizon";
 import { getDashboardOverview } from "@/features/dashboard/queries/get-dashboard-overview";
@@ -37,14 +36,11 @@ export default async function DashboardPage() {
       </div>
 
       <DashboardSummaryCards overview={overview} />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-        <DashboardStatusPanel overview={overview} />
-        <DashboardMilestones
-          milestones={overview.milestones}
-          currentWealth={overview.portfolioOverview.totalValue}
-          targetWealth={overview.goalSettings?.targetWealth ?? null}
-        />
-      </div>
+      <DashboardMilestones
+        milestones={overview.milestones}
+        currentWealth={overview.portfolioOverview.totalValue}
+        targetWealth={overview.goalSettings?.targetWealth ?? null}
+      />
 
       <DashboardNextActions steps={overview.setupSteps} />
     </section>
