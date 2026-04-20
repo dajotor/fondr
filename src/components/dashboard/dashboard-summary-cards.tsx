@@ -15,7 +15,7 @@ export function DashboardSummaryCards({
   });
 
   return (
-    <div className="grid gap-4 xl:grid-cols-3">
+    <div className="grid gap-4 xl:grid-cols-2">
       <div className="app-kpi-featured">
         <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-white/68">Aktuelles Vermögen</p>
         <p className="app-data-value mt-4 text-4xl font-semibold text-white md:text-5xl">
@@ -26,30 +26,43 @@ export function DashboardSummaryCards({
         </p>
       </div>
 
-      <div className="app-kpi">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-          Nächster geplanter Beitrag
+      <div className="app-kpi-featured">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-white/68">
+          Dein Ziel
         </p>
-        <p className="app-data-value mt-4 text-3xl font-semibold text-foreground md:text-4xl">
-          {formatCurrencyWhole(overview.nextMonthlyContribution)}
-        </p>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">
-          Diesen Betrag investierst du voraussichtlich im nächsten Monat.
-        </p>
-      </div>
-
-      <div className="app-kpi">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Zielstatus</p>
-        <p
-          className={`mt-4 font-display text-3xl font-semibold tracking-[-0.04em] md:text-4xl ${
-            goalStatus.kind === "on-track" ? "text-cyan-300" : "text-foreground"
-          }`}
-        >
-          {goalStatus.label}
-        </p>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">
-          {goalStatus.description}
-        </p>
+        {overview.goalSettings ? (
+          <>
+            <p className="app-data-value mt-4 text-4xl font-semibold text-white md:text-5xl">
+              {formatCurrencyWhole(overview.goalSettings.targetWealth)}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-white/80">
+              bis {overview.goalSettings.targetYear}
+            </p>
+            <div className="mt-5 border-t border-white/10 pt-4">
+              <p
+                className={`font-display text-xl font-semibold tracking-[-0.03em] ${
+                  goalStatus.kind === "on-track"
+                    ? "text-cyan-300"
+                    : "text-white"
+                }`}
+              >
+                {goalStatus.label}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-white/80">
+                {goalStatus.description}
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="app-data-value mt-4 text-4xl font-semibold text-white md:text-5xl">
+              Noch kein Ziel
+            </p>
+            <p className="mt-3 text-sm leading-6 text-white/80">
+              {goalStatus.description}
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
