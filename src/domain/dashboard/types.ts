@@ -22,6 +22,19 @@ export type DashboardSetupStep = {
   hasDataQualityNotice: boolean;
 };
 
+export type DashboardMilestoneStatus =
+  | "upcoming"
+  | "reached"
+  | "out-of-horizon";
+
+export type DashboardMilestone = {
+  label: string;
+  targetWealth: number;
+  status: DashboardMilestoneStatus;
+  monthsFromNow: number | null;
+  targetMonth: string | null;
+};
+
 export type DashboardOverview = {
   portfolioOverview: PortfolioOverview;
   nextMonthlyContribution: number;
@@ -30,6 +43,7 @@ export type DashboardOverview = {
   forecastYears: number;
   typicalEndValue: number | null;
   projection: PortfolioProjection | null;
+  milestones: DashboardMilestone[];
   setupSteps: DashboardSetupStep[];
   hasContributionPlan: boolean;
   hasAllocationSetup: boolean;

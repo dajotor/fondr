@@ -23,6 +23,7 @@ import {
   buildAnalysisNotices,
   buildContributionNotices,
 } from "@/lib/plausibility";
+import { buildDashboardMilestones } from "@/features/dashboard/lib/milestones";
 import { getPortfolioOverview } from "@/features/portfolio/queries/get-portfolio-overview";
 import { getGoalSettings } from "@/features/goals/queries/get-goal-settings";
 import { evaluateGoalAgainstSimulation, getTargetMonthIndex } from "@/features/goals/lib/goal-optimization";
@@ -362,6 +363,17 @@ export async function getDashboardOverview(
           simulation,
         })
       : null;
+  const milestones =
+    simulation && assumptions.length > 0
+      ? buildDashboardMilestones({
+          currentWealth: portfolioOverview.totalValue,
+          targetWealth: goalSettings?.targetWealth ?? null,
+          percentileTimeline: simulation.percentileTimeline.slice(
+            0,
+            dashboardForecastMonthsAhead,
+          ),
+        })
+      : [];
 
   const notices =
     safeGoalSettings && goalEvaluation && simulation
@@ -410,6 +422,7 @@ export async function getDashboardOverview(
     forecastYears: years,
     typicalEndValue,
     projection,
+    milestones,
     setupSteps,
     hasContributionPlan,
     hasAllocationSetup,

@@ -1,4 +1,4 @@
-import { DashboardMiniTrend } from "@/components/dashboard/dashboard-mini-trend";
+import { DashboardMilestones } from "@/components/dashboard/dashboard-milestones";
 import { DashboardNextActions } from "@/components/dashboard/dashboard-next-actions";
 import { DashboardStatusPanel } from "@/components/dashboard/dashboard-status-panel";
 import { DashboardSummaryCards } from "@/components/dashboard/dashboard-summary-cards";
@@ -39,7 +39,7 @@ export default async function DashboardPage() {
       <DashboardSummaryCards overview={overview} />
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
         <DashboardStatusPanel overview={overview} />
-        <DashboardMiniTrend projection={overview.projection} />
+        <DashboardMilestones milestones={overview.milestones} />
       </div>
 
       <DashboardNextActions steps={overview.setupSteps} />
