@@ -28,6 +28,25 @@ function formatMonthsFromNow(months: number) {
   return `in ${yearPart} und ${monthPart}`;
 }
 
+function formatCompactWealth(value: number): string {
+  if (value >= 1_000_000) {
+    const inMillions = value / 1_000_000;
+
+    if (inMillions === Math.floor(inMillions)) {
+      return `${Math.floor(inMillions)}M`;
+    }
+
+    return `${inMillions.toFixed(2).replace(".", ",").replace(/,?0+$/, "")}M`;
+  }
+
+  if (value >= 1_000) {
+    const inThousands = Math.round(value / 1_000);
+    return `${inThousands}k`;
+  }
+
+  return `${Math.round(value)}`;
+}
+
 function wealthToPosition(
   wealth: number,
   currentWealth: number,
@@ -129,46 +148,67 @@ export function DashboardMilestones({
           </p>
         </div>
 
-        <div
-          className="relative mb-8 h-5 w-full"
-          role="img"
-          aria-label={`Fortschritt: ${progressPercent} Prozent des Zielvermögens erreicht`}
-        >
+        <div className="relative mb-8 w-full">
           <div
-            className="absolute left-0 right-0 top-1/2 h-2.5 -translate-y-1/2 rounded-full bg-slate-400/12"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute left-0 top-1/2 h-2.5 -translate-y-1/2 rounded-full bg-cyan-300"
-            style={{
-              width: `${progressRatio * 100}%`,
-              transition: "none",
-            }}
-            aria-hidden="true"
-          />
-          <div
-            className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300 ring-2 ring-[rgb(15,20,22)]"
-            style={{ left: "0%" }}
-            aria-label="Heute"
-          />
-          {milestones.map((milestone) => {
-            const position = wealthToPosition(
-              milestone.targetWealth,
-              currentWealth,
-              targetWealth,
-            );
-            const isReached = milestone.status === "reached";
-            return (
-              <div
-                key={`${milestone.label}-${milestone.targetWealth}`}
-                className={`absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-[rgb(15,20,22)] ${
-                  isReached ? "bg-cyan-300" : "bg-slate-100"
-                }`}
-                style={{ left: `${position * 100}%` }}
-                aria-label={`${milestone.label}: ${formatCurrencyWhole(milestone.targetWealth)}`}
-              />
-            );
-          })}
+            className="relative h-5 w-full"
+            role="img"
+            aria-label={`Fortschritt: ${progressPercent} Prozent des Zielvermögens erreicht`}
+          >
+            <div
+              className="absolute left-0 right-0 top-1/2 h-2.5 -translate-y-1/2 rounded-full bg-slate-400/12"
+              aria-hidden="true"
+            />
+            <div
+              className="absolute left-0 top-1/2 h-2.5 -translate-y-1/2 rounded-full bg-cyan-300"
+              style={{
+                width: `${progressRatio * 100}%`,
+                transition: "none",
+              }}
+              aria-hidden="true"
+            />
+            <div
+              className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300 ring-2 ring-[rgb(15,20,22)]"
+              style={{ left: "0%" }}
+              aria-label="Heute"
+            />
+            {milestones.map((milestone) => {
+              const position = wealthToPosition(
+                milestone.targetWealth,
+                currentWealth,
+                targetWealth,
+              );
+              const isReached = milestone.status === "reached";
+              return (
+                <div
+                  key={`${milestone.label}-marker-${milestone.targetWealth}`}
+                  className={`absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-[rgb(15,20,22)] ${
+                    isReached ? "bg-cyan-300" : "bg-slate-100"
+                  }`}
+                  style={{ left: `${position * 100}%` }}
+                  aria-label={`${milestone.label}: ${formatCurrencyWhole(milestone.targetWealth)}`}
+                />
+              );
+            })}
+          </div>
+
+          <div className="relative mt-3 h-4 w-full">
+            {milestones.map((milestone) => {
+              const position = wealthToPosition(
+                milestone.targetWealth,
+                currentWealth,
+                targetWealth,
+              );
+              return (
+                <span
+                  key={`${milestone.label}-label-${milestone.targetWealth}`}
+                  className="absolute -translate-x-1/2 text-xs font-medium text-slate-300"
+                  style={{ left: `${position * 100}%` }}
+                >
+                  {formatCompactWealth(milestone.targetWealth)}
+                </span>
+              );
+            })}
+          </div>
         </div>
 
         <ul className="space-y-2.5">

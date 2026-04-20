@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type { DashboardOverview } from "@/domain/dashboard/types";
 import { DASHBOARD_FORECAST_YEARS } from "@/features/analysis/lib/horizon";
 import { resolveGoalStatus } from "@/features/goals/lib/goal-status";
@@ -40,6 +42,13 @@ export function DashboardSummaryCards({
               : "Sobald Portfolio, Einzahlungen und Annahmen vollständig sind, erscheint hier deine Prognose."}
           </p>
         </div>
+        <Link
+          href={`/analyse?years=${DASHBOARD_FORECAST_YEARS}`}
+          className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-cyan-300 transition hover:text-cyan-200"
+        >
+          Analyse öffnen
+          <span aria-hidden="true">→</span>
+        </Link>
       </div>
 
       <div className="app-kpi-featured">
@@ -79,6 +88,13 @@ export function DashboardSummaryCards({
             </p>
           </>
         )}
+        <Link
+          href="/ziele"
+          className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-cyan-300 transition hover:text-cyan-200"
+        >
+          Ziele anpassen
+          <span aria-hidden="true">→</span>
+        </Link>
       </div>
     </div>
   );
