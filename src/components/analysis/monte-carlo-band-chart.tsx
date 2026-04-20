@@ -50,11 +50,11 @@ export function MonteCarloBandChart({ simulation }: MonteCarloBandChartProps) {
     });
 
   return (
-    <div className="space-y-4">
-      <div className="overflow-hidden rounded-[calc(var(--radius)+2px)] border border-border bg-card p-4">
+    <div className="flex h-full flex-col gap-4">
+      <div className="flex flex-1 overflow-hidden rounded-[calc(var(--radius)+2px)] border border-border bg-card p-4">
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className="h-56 w-full"
+          className="h-full min-h-[18rem] w-full"
           preserveAspectRatio="none"
           role="img"
           aria-label="Bandbreite der Monte-Carlo-Simulation"

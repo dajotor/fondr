@@ -204,8 +204,8 @@ export default async function AnalysisPage({ searchParams }: AnalysisPageProps) 
             <MonteCarloSummary simulation={monteCarloSimulation} />
 
             <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.85fr)]">
-              <div className="space-y-3">
-                <div className="app-card-muted">
+              <div className="flex h-full flex-col gap-3">
+                <div className="app-card-muted flex flex-1 flex-col">
                   <MonteCarloBandChart simulation={monteCarloSimulation} />
                 </div>
                 <p className="text-xs leading-6 text-muted-foreground">
@@ -214,7 +214,7 @@ export default async function AnalysisPage({ searchParams }: AnalysisPageProps) 
                 </p>
               </div>
 
-              <div className="app-card-muted">
+              <div className="app-card-muted flex h-full flex-col">
                 <div className="mb-4 space-y-1">
                   <p className="text-sm font-medium text-foreground">
                     Endwertverteilung
