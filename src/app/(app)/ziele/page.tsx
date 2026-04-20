@@ -61,6 +61,13 @@ export default async function GoalsPage() {
     getPortfolioAllocationEtfs(user.id),
   ]);
   const goalSettings = storedGoalSettings ?? buildDefaultGoalSettings(user.id);
+  const validEtfIds = new Set(portfolioEtfs.map((etf) => etf.etfId));
+  const validAllocationRules = allocationRules.filter((rule) =>
+    validEtfIds.has(rule.etfId),
+  );
+  const validOverrides = overrides.filter((override) =>
+    validEtfIds.has(override.etfId),
+  );
 
   if (assumptions.length === 0) {
     return (
@@ -97,8 +104,8 @@ export default async function GoalsPage() {
   );
   const allocationTimeline = buildAllocationTimelinePreview(
     contributionTimeline,
-    allocationRules,
-    overrides,
+    validAllocationRules,
+    validOverrides,
     portfolioEtfs,
   );
   const currentSimulation = runMonteCarloSimulation({
@@ -113,8 +120,8 @@ export default async function GoalsPage() {
   });
   const optimizationResult = findRequiredMonthlyContribution({
     assumptions,
-    allocationRules,
-    overrides,
+    allocationRules: validAllocationRules,
+    overrides: validOverrides,
     portfolioEtfs,
     existingRules: contributionRules,
     lumpSums,
@@ -122,8 +129,8 @@ export default async function GoalsPage() {
   });
   const comparisons = comparePlans({
     assumptions,
-    allocationRules,
-    overrides,
+    allocationRules: validAllocationRules,
+    overrides: validOverrides,
     portfolioEtfs,
     existingRules: contributionRules,
     lumpSums,
@@ -136,7 +143,7 @@ export default async function GoalsPage() {
     assumptions,
     contributionRules,
     lumpSums,
-    allocationRules,
+    allocationRules: validAllocationRules,
     allocationTimeline,
   });
 
